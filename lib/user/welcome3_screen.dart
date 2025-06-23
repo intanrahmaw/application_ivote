@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:application_ivote/user/welcome3_screen.dart';
 
-class Welcome2Screen extends StatelessWidget {
-  const Welcome2Screen({super.key});
+class Welcome3Screen extends StatelessWidget {
+  const Welcome3Screen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +42,7 @@ class Welcome2Screen extends StatelessWidget {
                       width: screenWidth * 0.4,
                       height: screenWidth * 0.4,
                       child: Image.asset(
-                        'assets/Image/welcome2.png',
+                        'assets/Image/welcome3.png',
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -52,7 +51,7 @@ class Welcome2Screen extends StatelessWidget {
                 const SizedBox(height: 40.0),
 
                 const Text(
-                  'Stay Tuned',
+                  'Make your choice',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 32.0,
@@ -63,7 +62,7 @@ class Welcome2Screen extends StatelessWidget {
                 const SizedBox(height: 16.0),
 
                 const Text(
-                  'Follow each candidates election\ncampaign',
+                  'Vote for your favorite candidate,\nand view the results in real time',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16.0,
@@ -85,6 +84,15 @@ class Welcome2Screen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4.0),
                       ),
                     ),
+
+                    Container(
+                      width: 8.0,
+                      height: 8.0,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300], // Abu-abu lebih terang untuk tidak aktif
+                        borderRadius: BorderRadius.circular(4.0),
+                      ),
+                    ),
                     const SizedBox(width: 8.0),
                     // Indikator 2 (Sekarang Aktif)
                     Container(
@@ -96,15 +104,6 @@ class Welcome2Screen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8.0),
-
-                    Container(
-                      width: 8.0,
-                      height: 8.0,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300], // Abu-abu lebih terang untuk tidak aktif
-                        borderRadius: BorderRadius.circular(4.0),
-                      ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 50.0),
@@ -114,10 +113,7 @@ class Welcome2Screen extends StatelessWidget {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => Welcome3Screen()),
-                      );
+                      //welcome
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF8A2BE2),
