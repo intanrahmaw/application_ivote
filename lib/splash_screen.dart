@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:application_ivote/welcome1_screen.dart';
 
-import 'package:application_ivote/user/welcome1_screen.dart';
-
-
-
-class SplashScreenUser extends StatefulWidget {
-  const SplashScreenUser({super.key});
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
 
   @override
-  State<SplashScreenUser> createState() => _SplashScreenUserState();
+  State<SplashScreen> createState() => _SplashScreenUserState();
 }
 
-class _SplashScreenUserState extends State<SplashScreenUser> {
+class _SplashScreenUserState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
