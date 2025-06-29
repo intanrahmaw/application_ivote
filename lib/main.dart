@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:application_ivote/user/dashboard.dart';
+import 'package:application_ivote/dashboard.dart';
 
 void main() {
   runApp(const MyApp());
