@@ -36,7 +36,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 8),
 
-              // Judul
+            
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
                 child: Text(
