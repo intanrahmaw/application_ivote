@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:application_ivote/registrasi_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -117,7 +118,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   onPressed: () {
-                    // Navigasi ke halaman registrasi
+                    // Navigasi ke RegistrasiScreen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => RegisterScreen()),
+                    );
                   },
                   child: const Text(
                     'Create Account',
