@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:application_ivote/welcome3_screen.dart';
 import 'package:application_ivote/login_screen.dart';
 
@@ -7,15 +8,13 @@ class Welcome2Screen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Digunakan untuk perhitungan ukuran gambar agar tetap responsif terhadap lebar layar,
-    // yang membantu mempertahankan tampilan yang sama di berbagai ukuran perangkat.
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea( // Mengamankan konten dari tumpang tindih dengan bilah status (status bar)
-        child: SingleChildScrollView( // Memungkinkan konten untuk digulir jika melebihi tinggi layar, mencegah overflow
+        child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
@@ -25,11 +24,7 @@ class Welcome2Screen extends StatelessWidget {
                   alignment: Alignment.topRight,
                   child: TextButton(
                     onPressed: () {
-                      // Navigasi ke LoginScreen
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginScreen()),
-                      );
+                      Get.off(() => LoginScreen());
                     },
                     child: const Text(
                       'Skip',
@@ -81,22 +76,21 @@ class Welcome2Screen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Indikator 1 (Sekarang Tidak Aktif)
                     Container(
-                      width: 8.0, // Diubah dari 24.0
+                      width: 8.0, 
                       height: 8.0,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300], // Diubah dari Colors.black
+                        color: Colors.grey[300],
                         borderRadius: BorderRadius.circular(4.0),
                       ),
                     ),
                     const SizedBox(width: 8.0),
-                    // Indikator 2 (Sekarang Aktif)
+                   
                     Container(
-                      width: 24.0, // Diubah dari 8.0
+                      width: 24.0,
                       height: 8.0,
                       decoration: BoxDecoration(
-                        color: Colors.black, // Diubah dari Colors.grey[300]
+                        color: Colors.black,
                         borderRadius: BorderRadius.circular(4.0),
                       ),
                     ),
@@ -106,7 +100,7 @@ class Welcome2Screen extends StatelessWidget {
                       width: 8.0,
                       height: 8.0,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300], // Abu-abu lebih terang untuk tidak aktif
+                        color: Colors.grey[300],
                         borderRadius: BorderRadius.circular(4.0),
                       ),
                     ),
@@ -119,10 +113,7 @@ class Welcome2Screen extends StatelessWidget {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => Welcome3Screen()),
-                      );
+                      Get.to(() => Welcome3Screen());
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF8A2BE2),

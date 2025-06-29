@@ -28,7 +28,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             children: [
               const SizedBox(height: 16),
 
-              // Tombol kembali
               IconButton(
                 onPressed: () => Navigator.pop(context),
                 icon: const Icon(Icons.arrow_back, color: Colors.purple),

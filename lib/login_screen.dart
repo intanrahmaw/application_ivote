@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:application_ivote/registrasi_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -23,14 +24,12 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Logo
               Image.asset(
                 'assets/Image/Logo.png',
                 height: 200,
               ),
               const SizedBox(height: 16),
 
-              // Title
               const Text(
                 'WELCOME TO I-VOTE',
                 style: TextStyle(
@@ -41,7 +40,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 32),
 
-              // Username field
               TextField(
                 controller: _usernameController,
                 decoration: InputDecoration(
@@ -55,7 +53,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Password field
               TextField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
@@ -80,7 +77,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 50),
 
-              // Login Button
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -106,7 +102,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 15),
 
-              // Create Account Button
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -118,11 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   onPressed: () {
-                    // Navigasi ke RegistrasiScreen
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => RegisterScreen()),
-                    );
+                    Get.to(() => RegisterScreen());
                   },
                   child: const Text(
                     'Create Account',
