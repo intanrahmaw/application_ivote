@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:application_ivote/user/login_screen.dart';
 
 class Welcome3Screen extends StatelessWidget {
   const Welcome3Screen({super.key});
@@ -23,7 +24,10 @@ class Welcome3Screen extends StatelessWidget {
                   alignment: Alignment.topRight,
                   child: TextButton(
                     onPressed: () {
-                      // TODO: Tambahkan navigasi ke layar selanjutnya atau lewati welcome screen
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                      );
                     },
                     child: const Text(
                       'Skip',
@@ -116,10 +120,14 @@ class Welcome3Screen extends StatelessWidget {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
-                      //welcome
+                      // Navigasi ke LoginScreen
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF8A2BE2),
+                      backgroundColor: const Color(0xFF8A2BE2), // Warna ungu
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),

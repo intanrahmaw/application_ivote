@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:application_ivote/user/welcome3_screen.dart';
+import 'package:application_ivote/user/login_screen.dart';
 
 class Welcome2Screen extends StatelessWidget {
   const Welcome2Screen({super.key});
@@ -24,7 +25,10 @@ class Welcome2Screen extends StatelessWidget {
                   alignment: Alignment.topRight,
                   child: TextButton(
                     onPressed: () {
-                      // TODO: Tambahkan navigasi ke layar selanjutnya atau lewati welcome screen
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                      );
                     },
                     child: const Text(
                       'Skip',
