@@ -63,7 +63,7 @@ class Welcome2Screen extends StatelessWidget {
                 const SizedBox(height: 16.0),
 
                 const Text(
-                  'Follow each candidates election\ncampaign',
+                  'Follow each candidates selection\ncampaign',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16.0,

@@ -77,33 +77,36 @@ class Welcome3Screen extends StatelessWidget {
                   children: [
                     // Indikator 1 (Sekarang Tidak Aktif)
                     Container(
-                      width: 8.0, // Diubah dari 24.0
+                      width: 8.0,
                       height: 8.0,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300], // Diubah dari Colors.black
+                        color: Colors.grey[300],
                         borderRadius: BorderRadius.circular(4.0),
                       ),
                     ),
+                    const SizedBox(width: 8.0), // Menambahkan jarak setelah indikator pertama
 
+                    // Indikator 2 (Tidak Aktif)
                     Container(
                       width: 8.0,
                       height: 8.0,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300], // Abu-abu lebih terang untuk tidak aktif
+                        color: Colors.grey[300],
                         borderRadius: BorderRadius.circular(4.0),
                       ),
                     ),
-                    const SizedBox(width: 8.0),
-                    // Indikator 2 (Sekarang Aktif)
+                    const SizedBox(width: 8.0), // Menambahkan jarak setelah indikator kedua
+
+                    // Indikator 3 (Sekarang Aktif)
                     Container(
-                      width: 24.0, // Diubah dari 8.0
+                      width: 24.0,
                       height: 8.0,
                       decoration: BoxDecoration(
-                        color: Colors.black, // Diubah dari Colors.grey[300]
+                        color: Colors.black,
                         borderRadius: BorderRadius.circular(4.0),
                       ),
                     ),
-                    const SizedBox(width: 8.0),
+                    // Tidak perlu SizedBox setelah indikator terakhir jika tidak ada elemen lain setelahnya
                   ],
                 ),
                 const SizedBox(height: 50.0),
