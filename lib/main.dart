@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:application_ivote/login_screen.dart';
+import 'package:application_ivote/splash_screen.dart';
 
 void main() {
   runApp(const MyApp());
