@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:application_ivote/login_screen.dart';
 import 'package:application_ivote/splash_screen.dart';
 
 void main() {
@@ -16,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: LoginScreen(),
+      home: SplashScreen(),
     );
   }
 }
