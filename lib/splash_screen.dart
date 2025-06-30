@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:get/get.dart';
 import 'package:application_ivote/welcome1_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -13,20 +14,15 @@ class _SplashScreenUserState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Delay 3 detik lalu pindah ke halaman berikutnya
     Timer(const Duration(seconds: 4), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Welcome1Screen()),
-      );
+      Get.off(() => Welcome1Screen());
     });
   }
-  
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Bisa kamu ganti sesuai tema
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
