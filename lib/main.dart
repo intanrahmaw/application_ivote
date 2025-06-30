@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:application_ivote/register.dart';
+import 'package:application_ivote/register_screen.dart';
 
 void main() {
   runApp(const MyApp());
