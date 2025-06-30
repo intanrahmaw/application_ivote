@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:application_ivote/screens/profil_screen.dart';
+import 'package:get/get.dart';
+import 'package:application_ivote/hasil_vote.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,12 +11,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'iVote',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: ProfileScreen(),
+      home: HasilVotingScreen(),
     );
   }
 }
