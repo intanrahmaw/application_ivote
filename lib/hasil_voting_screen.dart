@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:application_ivote/widgets/bottom_navbar.dart';
 
 class HasilVotingScreen extends StatefulWidget {
   const HasilVotingScreen({super.key});
