@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:application_ivote/login_screen.dart';
+import 'package:application_ivote/screens/welcome/welcome3_screen.dart';
+import 'package:application_ivote/screens/auth/login_screen.dart';
 
-class Welcome3Screen extends StatelessWidget {
-  const Welcome3Screen({super.key});
+class Welcome2Screen extends StatelessWidget {
+  const Welcome2Screen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +43,7 @@ class Welcome3Screen extends StatelessWidget {
                       width: screenWidth * 0.4,
                       height: screenWidth * 0.4,
                       child: Image.asset(
-                        'assets/Image/welcome3.png',
+                        'assets/Image/welcome2.png',
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -51,7 +52,7 @@ class Welcome3Screen extends StatelessWidget {
                 const SizedBox(height: 40.0),
 
                 const Text(
-                  'Make your choice',
+                  'Stay Tuned',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 32.0,
@@ -62,7 +63,7 @@ class Welcome3Screen extends StatelessWidget {
                 const SizedBox(height: 16.0),
 
                 const Text(
-                  'Vote for your favorite candidate,\nand view the results in real time',
+                  'Follow each candidates selection\ncampaign',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16.0,
@@ -76,7 +77,7 @@ class Welcome3Screen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      width: 8.0,
+                      width: 8.0, 
                       height: 8.0,
                       decoration: BoxDecoration(
                         color: Colors.grey[300],
@@ -84,22 +85,22 @@ class Welcome3Screen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8.0),
-
-                    Container(
-                      width: 8.0,
-                      height: 8.0,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(4.0),
-                      ),
-                    ),
-                    const SizedBox(width: 8.0),
-
+                   
                     Container(
                       width: 24.0,
                       height: 8.0,
                       decoration: BoxDecoration(
                         color: Colors.black,
+                        borderRadius: BorderRadius.circular(4.0),
+                      ),
+                    ),
+                    const SizedBox(width: 8.0),
+
+                    Container(
+                      width: 8.0,
+                      height: 8.0,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
                         borderRadius: BorderRadius.circular(4.0),
                       ),
                     ),
@@ -112,7 +113,7 @@ class Welcome3Screen extends StatelessWidget {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
-                      Get.to(() => LoginScreen());
+                      Get.to(() => Welcome3Screen());
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF8A2BE2),

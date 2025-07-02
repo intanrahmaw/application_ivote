@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:get/get.dart';
-import 'package:application_ivote/welcome1_screen.dart';
+import 'package:application_ivote/screens/welcome/welcome1_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

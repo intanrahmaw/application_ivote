@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:application_ivote/welcome3_screen.dart';
 import 'package:get/get.dart';
-import 'package:application_ivote/welcome3_screen.dart';
-import 'package:application_ivote/login_screen.dart';
+import 'package:application_ivote/screens/welcome/welcome2_screen.dart';
+import 'package:application_ivote/screens/auth/login_screen.dart';
 
-class Welcome2Screen extends StatelessWidget {
-  const Welcome2Screen({super.key});
+class Welcome1Screen extends StatelessWidget {
+  const Welcome1Screen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +14,7 @@ class Welcome2Screen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea( // Mengamankan konten dari tumpang tindih dengan bilah status (status bar)
-        child: SingleChildScrollView(
+        child: SingleChildScrollView( 
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
@@ -44,7 +43,7 @@ class Welcome2Screen extends StatelessWidget {
                       width: screenWidth * 0.4,
                       height: screenWidth * 0.4,
                       child: Image.asset(
-                        'assets/Image/welcome2.png',
+                        'assets/Image/welcome1.png',
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -53,7 +52,7 @@ class Welcome2Screen extends StatelessWidget {
                 const SizedBox(height: 40.0),
 
                 const Text(
-                  'Stay Tuned',
+                  'Welcome to iVote',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 32.0,
@@ -64,7 +63,7 @@ class Welcome2Screen extends StatelessWidget {
                 const SizedBox(height: 16.0),
 
                 const Text(
-                  'Follow each candidates selection\ncampaign',
+                  'The online voting application\nCreate your account and stay tuned',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16.0,
@@ -78,20 +77,19 @@ class Welcome2Screen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      width: 8.0, 
-                      height: 8.0,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(4.0),
-                      ),
-                    ),
-                    const SizedBox(width: 8.0),
-                   
-                    Container(
                       width: 24.0,
                       height: 8.0,
                       decoration: BoxDecoration(
                         color: Colors.black,
+                        borderRadius: BorderRadius.circular(4.0),
+                      ),
+                    ),
+                    const SizedBox(width: 8.0),
+                    Container(
+                      width: 8.0,
+                      height: 8.0,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
                         borderRadius: BorderRadius.circular(4.0),
                       ),
                     ),
@@ -114,7 +112,7 @@ class Welcome2Screen extends StatelessWidget {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
-                      Get.to(() => Welcome3Screen());
+                      Get.to(() => Welcome2Screen());
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF8A2BE2),
