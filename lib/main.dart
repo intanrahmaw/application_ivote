@@ -29,10 +29,11 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'iVote',
-      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
+      initialRoute: AppRoutes.splash,
+      getPages: AppRoutes.routes, 
       home: SplashScreen(),
     );
   }
