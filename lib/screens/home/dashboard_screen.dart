@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:application_ivote/widgets/custom_bottom_nav_bar_user.dart';
+import 'package:application_ivote/utils/global_user.dart'; // ⬅️ import variabel global
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -28,21 +29,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Icon(Icons.person, color: Colors.white),
           ),
         ),
-        title: const Text('Admin'),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Icon(Icons.wifi, color: Colors.black),
-          ),
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Icon(Icons.battery_full, color: Colors.black),
-          ),
-        ],
+        title: Text(loggedInUserName.isNotEmpty ? loggedInUserName : 'Pengguna'), // ⬅️ tampilkan nama
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4.0),
           child: Container(
-            color: Colors.grey[200], // Separator line under AppBar
+            color: Colors.grey[200],
             height: 1.0,
           ),
         ),
@@ -70,7 +61,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         'Waktu tersisa untuk pemilu',
                         style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                       ),
-                    ], 
+                    ],
                   ),
                   const SizedBox(height: 16.0),
                   Row(
@@ -86,8 +77,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             const SizedBox(height: 24.0),
-
-            // Kandidat Section
             const Text(
               'Kandidat',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -115,39 +104,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             const SizedBox(height: 16.0),
-
-            // Kandidat List
             _buildKandidatCard('Intan Rahma', 'Kandidat 1'),
             const SizedBox(height: 16.0),
             _buildKandidatCard('Fadenta', 'Kandidat 2'),
-            // Add more KandidatCards as needed
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Pengaturan',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.how_to_vote),
-            label: 'Hasil Vote',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.deepPurple,
-        unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed, // To show all labels
+      bottomNavigationBar: CustomBottomNavBarUser(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
       ),
     );
   }
@@ -182,7 +147,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             color: Colors.grey.withOpacity(0.2),
             spreadRadius: 1,
             blurRadius: 5,
-            offset: const Offset(0, 3), // changes position of shadow
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -209,9 +174,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
           OutlinedButton(
-            onPressed: () {
-              // Handle "lihat profile" tap
-            },
+            onPressed: () {},
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Colors.deepPurple),
               shape: RoundedRectangleBorder(

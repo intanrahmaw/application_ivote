@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../main.dart';
 import '../../utils/app_routes.dart';
+import '../../utils/global_user.dart'; // ⬅️ Import global user
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -36,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // 🔐 Login manual ke tabel users
+      // 🔐 Autentikasi manual dari tabel users
       final response = await supabase
           .from('users')
           .select()
@@ -54,7 +55,10 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      final nama = response['nama'];
+      final nama = response['nama'] ?? 'Pengguna';
+
+      // Simpan ke variabel global
+      loggedInUserName = nama;
 
       Get.snackbar(
         'Berhasil Login',
@@ -63,9 +67,10 @@ class _LoginScreenState extends State<LoginScreen> {
         colorText: Colors.white,
       );
 
+      // Navigasi ke dashboard
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
-      print('Login Error: $e');
+      debugPrint('Login Error: $e');
       Get.snackbar(
         'Error',
         'Terjadi kesalahan: $e',
