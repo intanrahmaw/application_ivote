@@ -1,19 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:application_ivote/screens/home/dashboard_screen.dart';
 
-class VotePage extends StatefulWidget {
-  const VotePage({super.key});
+class VoteScreen extends StatefulWidget {
+  const VoteScreen({super.key});
 
   @override
-  State<VotePage> createState() => _VotePageState();
+  State<VoteScreen> createState() => _VoteScreenState(); // ⬅️ diperbaiki nama State
 }
 
-class _VotePageState extends State<VotePage> {
+class _VoteScreenState extends State<VoteScreen> {
   int _currentIndex = 1;
 
   final List<Map<String, String>> candidates = [
     {"name": "Intan Rahma"},
     {"name": "Fadenta"},
   ];
+
+  void _onItemTapped(int index) {
+    if (index == _currentIndex) return;
+
+    setState(() {
+      _currentIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        Get.offAll(() => const DashboardScreen());
+        break;
+      case 1:
+        // Stay on VoteScreen
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,25 +50,27 @@ class _VotePageState extends State<VotePage> {
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black87),
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: candidates.length,
         itemBuilder: (context, index) {
+          final name = candidates[index]['name']!;
           return Container(
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFFF1E9F9), // Soft purple background
+              color: const Color(0xFFF1E9F9),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
               children: [
-                const Icon(Icons.image, size: 40, color: Colors.black54),
+                const Icon(Icons.account_circle, size: 40, color: Colors.deepPurple),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    candidates[index]['name']!,
+                    name,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
@@ -58,7 +79,7 @@ class _VotePageState extends State<VotePage> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // Add vote logic
+                    // TODO: Tambahkan logika voting
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFD1B5F9),
@@ -76,21 +97,17 @@ class _VotePageState extends State<VotePage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.black54,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-            // Navigasi antar halaman bisa ditambahkan di sini
-          });
-        },
+        selectedItemColor: Colors.deepPurple,
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
+            icon: Icon(Icons.how_to_vote),
             label: 'Vote',
           ),
           BottomNavigationBarItem(
