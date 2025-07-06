@@ -84,7 +84,7 @@ class _UserListScreenState extends State<UserListScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: ElevatedButton(
-              onPressed: () => _navigateAndRefresh(),
+              onPressed: () async => _navigateAndRefresh(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
                 foregroundColor: Colors.white,
