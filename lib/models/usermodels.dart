@@ -1,4 +1,4 @@
-class Profile {
+class AppUser {
   final String userId;
   final String username;
   final String password; // ⚠️ Sebaiknya dihindari jika di frontend
@@ -9,7 +9,7 @@ class Profile {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  Profile({
+  AppUser({
     required this.userId,
     required this.username,
     required this.password,
@@ -21,8 +21,8 @@ class Profile {
     required this.updatedAt,
   });
 
-  factory Profile.fromJson(Map<String, dynamic> json) {
-    return Profile(
+  factory AppUser.fromJson(Map<String, dynamic> json) {
+    return AppUser(
       userId: json['user_id'],
       username: json['username'],
       password: json['password'],
