@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../main.dart';
+import '../../utils/app_routes.dart';
+import '../../utils/global_user.dart';
+import 'register_screen.dart';
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -50,7 +55,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         await Supabase.instance.client.from('users').insert({
           'user_id': userId,
           'username': _usernameController.text.trim(),
-          'password': password, // ⚠️ Jangan gunakan di produksi
+          'password': password,
           'nama': _namaController.text.trim(),
           'email': email,
           'alamat': _alamatController.text.trim(),
@@ -88,122 +93,161 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 16),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.arrow_back, color: Colors.purple),
-                  iconSize: 30,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
                 ),
-                const SizedBox(height: 8),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(
-                    'Buat Akun',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Bagian atas: Judul "Buat Akun" (tanpa tombol back atas)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: screenHeight * 0.03), // Spasi atas yang sedikit lebih responsif
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8),
+                              child: Text(
+                                'Buat Akun',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // Bagian tengah: Semua input fields
+                        Column(
+                          children: [
+                            const SizedBox(height: 24),
+                            _buildInputField('Nama Lengkap', _namaController),
+                            _buildInputField('Username', _usernameController),
+                            _buildInputField(
+                              'Email',
+                              _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (value) {
+                                if (value == null || !GetUtils.isEmail(value)) {
+                                  return 'Email tidak valid';
+                                }
+                                return null;
+                              },
+                            ),
+                            _buildInputField('Alamat', _alamatController),
+                            Row(
+                              children: [
+                                // Rapikan tampilan inputan no hp
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  // Atur tinggi agar cocok dengan TextFormField
+                                  height: 54, // Default height of TextFormField is around 54-56
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF0F0F0),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: Colors.grey.shade400) // Tambah border agar terlihat sama
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: const Text(
+                                    '+62',
+                                    style: TextStyle(color: Colors.black87),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _buildInputField(
+                                    'Nomor HP',
+                                    _teleponController,
+                                    keyboardType: TextInputType.phone,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            _buildInputField(
+                              'Password',
+                              _passwordController,
+                              obscure: true,
+                              validator: (value) {
+                                if (value == null || value.length < 6) {
+                                  return 'Password minimal 6 karakter';
+                                }
+                                return null;
+                              },
+                            ),
+                            _buildInputField(
+                              'Ulangi Password',
+                              _ulangPasswordController,
+                              obscure: true,
+                            ),
+                          ],
+                        ),
+
+                        // Bagian bawah: Tombol Daftar dan Tombol Back
+                        Column(
+                          children: [
+                            const SizedBox(height: 30),
+                            _isLoading
+                                ? const Center(child: CircularProgressIndicator(color: Colors.purple))
+                                : SizedBox(
+                                    width: double.infinity,
+                                    height: 50,
+                                    child: ElevatedButton(
+                                      onPressed: _register,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.purple,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        'Daftar',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                            const SizedBox(height: 20), // Spasi antara tombol Daftar dan Back
+                            TextButton(
+                              onPressed: () => Get.back(), // Menggunakan Get.back() untuk kembali
+                              child: Text(
+                                'Sudah punya akun? Kembali ke Login',
+                                style: TextStyle(
+                                  color: Colors.purple,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: screenHeight * 0.02), // Spasi di bagian paling bawah
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
-
-                _buildInputField('Nama Lengkap', _namaController),
-                _buildInputField('Username', _usernameController),
-                _buildInputField(
-                  'Email',
-                  _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || !GetUtils.isEmail(value)) {
-                      return 'Email tidak valid';
-                    }
-                    return null;
-                  },
-                ),
-                _buildInputField('Alamat', _alamatController),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      height: 55,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF0F0F0),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      alignment: Alignment.center,
-                      child: const Text(
-                        '+62',
-                        style: TextStyle(color: Colors.black87),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _buildInputField(
-                        'Nomor HP',
-                        _teleponController,
-                        keyboardType: TextInputType.phone,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                _buildInputField(
-                  'Password',
-                  _passwordController,
-                  obscure: true,
-                  validator: (value) {
-                    if (value == null || value.length < 6) {
-                      return 'Password minimal 6 karakter';
-                    }
-                    return null;
-                  },
-                ),
-                _buildInputField(
-                  'Ulangi Password',
-                  _ulangPasswordController,
-                  obscure: true,
-                ),
-
-                const SizedBox(height: 30),
-                _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: _register,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.purple,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text(
-                            'Daftar',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                const SizedBox(height: 30),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -239,6 +283,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder( // Tambah enabledBorder untuk konsistensi visual
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder( // Tambah focusedBorder
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: Colors.purple, width: 2), // Contoh focus color
+          ),
+          errorBorder: OutlineInputBorder( // Tambah errorBorder
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: Colors.red, width: 2),
+          ),
+          focusedErrorBorder: OutlineInputBorder( // Tambah focusedErrorBorder
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: Colors.red, width: 2),
           ),
         ),
       ),

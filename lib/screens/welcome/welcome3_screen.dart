@@ -9,131 +9,147 @@ class Welcome3Screen extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
+    final screenHeight = mediaQuery.size.height;
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea( // Mengamankan konten dari tumpang tindih dengan bilah status (status bar)
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Align(
-                  alignment: Alignment.topRight,
-                  child: TextButton(
-                    onPressed: () {
-                      Get.off(() => LoginScreen());
-                    },
-                    child: const Text(
-                      'Skip',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 16.0,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Column(
+                        children: [
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: TextButton(
+                              onPressed: () {
+                                Get.off(() => LoginScreen());
+                              },
+                              child: const Text(
+                                'Skip',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 16.0,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 50.0),
+                        ],
                       ),
-                    ),
+                      Column(
+                        children: [
+                          Center(
+                            child: ClipOval(
+                              child: SizedBox(
+                                width: screenWidth * 0.4,
+                                height: screenWidth * 0.4,
+                                child: Image.asset(
+                                  'assets/Image/welcome3.png',
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 40.0),
+                          const Text(
+                            'Make your choice',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 32.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 16.0),
+                          const Text(
+                            'Vote for your favorite candidate,\nand view the results in real time',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              color: Colors.grey,
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          const SizedBox(height: 70.0),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 8.0,
+                                height: 8.0,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(4.0),
+                                ),
+                              ),
+                              const SizedBox(width: 8.0),
+                              Container(
+                                width: 8.0,
+                                height: 8.0,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(4.0),
+                                ),
+                              ),
+                              const SizedBox(width: 8.0),
+                              Container(
+                                width: 24.0,
+                                height: 8.0,
+                                decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(4.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 50.0),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Get.to(() => LoginScreen());
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF8A2BE2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                              ),
+                              child: const Text(
+                                'Enter',
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 50.0),
-
-                Center(
-                  child: ClipOval(
-                    child: SizedBox(
-                      width: screenWidth * 0.4,
-                      height: screenWidth * 0.4,
-                      child: Image.asset(
-                        'assets/Image/welcome3.png',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 40.0),
-
-                const Text(
-                  'Make your choice',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 32.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-
-                const Text(
-                  'Vote for your favorite candidate,\nand view the results in real time',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    color: Colors.grey,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 70.0),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 8.0,
-                      height: 8.0,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(4.0),
-                      ),
-                    ),
-                    const SizedBox(width: 8.0),
-
-                    Container(
-                      width: 8.0,
-                      height: 8.0,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(4.0),
-                      ),
-                    ),
-                    const SizedBox(width: 8.0),
-
-                    Container(
-                      width: 24.0,
-                      height: 8.0,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(4.0),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 50.0),
-
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Get.to(() => LoginScreen());
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF8A2BE2),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
-                    child: const Text(
-                      'Enter',
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
