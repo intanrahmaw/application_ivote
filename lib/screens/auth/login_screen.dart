@@ -99,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset('assets/Image/Logo.png', height: 200),
+              Image.asset('assets/Image/logo.png', height: 200),
               const SizedBox(height: 16),
               const Text(
                 'WELCOME TO I-VOTE',
