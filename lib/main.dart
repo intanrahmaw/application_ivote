@@ -1,8 +1,8 @@
+import 'package:application_ivote/screens/election/election_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:application_ivote/service/supabase_service.dart';
 import 'package:application_ivote/utils/constants.dart';
 import 'package:application_ivote/screens/profile/profile_screen.dart';
 
@@ -29,12 +29,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'iVote',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: ProfileScreen(),
+      home: ElectionListScreen(),
     );
   }
 }
