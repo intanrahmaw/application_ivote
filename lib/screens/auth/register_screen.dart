@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../main.dart';
 import '../../utils/app_routes.dart';
 import '../../utils/global_user.dart';
-import 'register_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -64,9 +62,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'updated_at': now,
         });
 
-        Get.snackbar('Berhasil', 'Registrasi berhasil! Silakan cek email Anda.',
-            backgroundColor: Colors.green, colorText: Colors.white);
-        Get.back();
+        Get.snackbar(
+          'Berhasil',
+          'Registrasi berhasil! Silakan login.',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
+        await Future.delayed(const Duration(seconds: 2));
+        Get.offAllNamed(AppRoutes.login);
       }
     } on AuthException catch (e) {
       Get.snackbar('Gagal Registrasi', e.message,
@@ -103,144 +107,89 @@ class _RegisterScreenState extends State<RegisterScreen> {
           builder: (context, constraints) {
             return SingleChildScrollView(
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Form(
                     key: _formKey,
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Bagian atas: Judul "Buat Akun" (tanpa tombol back atas)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: screenHeight * 0.03), // Spasi atas yang sedikit lebih responsif
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 8),
-                              child: Text(
-                                'Buat Akun',
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                        SizedBox(height: screenHeight * 0.04),
+                        const Text(
+                          'Buat Akun',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        _buildInputField('Nama Lengkap', _namaController),
+                        _buildInputField('Username', _usernameController),
+                        _buildInputField(
+                          'Email',
+                          _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (value) {
+                            if (value == null || !GetUtils.isEmail(value)) {
+                              return 'Email tidak valid';
+                            }
+                            return null;
+                          },
+                        ),
+                        _buildInputField('Alamat', _alamatController),
+                        _buildPhoneInput(),
+                        _buildInputField(
+                          'Password',
+                          _passwordController,
+                          obscure: true,
+                          validator: (value) {
+                            if (value == null || value.length < 6) {
+                              return 'Password minimal 6 karakter';
+                            }
+                            return null;
+                          },
+                        ),
+                        _buildInputField(
+                          'Ulangi Password',
+                          _ulangPasswordController,
+                          obscure: true,
+                        ),
+                        const SizedBox(height: 30),
+                        _isLoading
+                            ? const Center(
+                                child: CircularProgressIndicator(color: Colors.deepPurple))
+                            : ElevatedButton(
+                                onPressed: _register,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.deepPurple,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  minimumSize: const Size.fromHeight(50),
+                                ),
+                                child: const Text(
+                                  'Daftar',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold, color: Color.fromARGB(255, 255, 255, 255),
+                                    fontSize: 16,
+                                  ),
                                 ),
                               ),
+                        const SizedBox(height: 20),
+                        TextButton(
+                          onPressed: () => Get.back(),
+                          child: const Text(
+                            'Sudah punya akun? Kembali ke Login',
+                            style: TextStyle(
+                              color: Colors.deepPurple,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
+                          ),
                         ),
-
-                        // Bagian tengah: Semua input fields
-                        Column(
-                          children: [
-                            const SizedBox(height: 24),
-                            _buildInputField('Nama Lengkap', _namaController),
-                            _buildInputField('Username', _usernameController),
-                            _buildInputField(
-                              'Email',
-                              _emailController,
-                              keyboardType: TextInputType.emailAddress,
-                              validator: (value) {
-                                if (value == null || !GetUtils.isEmail(value)) {
-                                  return 'Email tidak valid';
-                                }
-                                return null;
-                              },
-                            ),
-                            _buildInputField('Alamat', _alamatController),
-                            Row(
-                              children: [
-                                // Rapikan tampilan inputan no hp
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                                  // Atur tinggi agar cocok dengan TextFormField
-                                  height: 54, // Default height of TextFormField is around 54-56
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF0F0F0),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: Colors.grey.shade400) // Tambah border agar terlihat sama
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: const Text(
-                                    '+62',
-                                    style: TextStyle(color: Colors.black87),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: _buildInputField(
-                                    'Nomor HP',
-                                    _teleponController,
-                                    keyboardType: TextInputType.phone,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            _buildInputField(
-                              'Password',
-                              _passwordController,
-                              obscure: true,
-                              validator: (value) {
-                                if (value == null || value.length < 6) {
-                                  return 'Password minimal 6 karakter';
-                                }
-                                return null;
-                              },
-                            ),
-                            _buildInputField(
-                              'Ulangi Password',
-                              _ulangPasswordController,
-                              obscure: true,
-                            ),
-                          ],
-                        ),
-
-                        // Bagian bawah: Tombol Daftar dan Tombol Back
-                        Column(
-                          children: [
-                            const SizedBox(height: 30),
-                            _isLoading
-                                ? const Center(child: CircularProgressIndicator(color: Colors.purple))
-                                : SizedBox(
-                                    width: double.infinity,
-                                    height: 50,
-                                    child: ElevatedButton(
-                                      onPressed: _register,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.purple,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                      ),
-                                      child: const Text(
-                                        'Daftar',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                            const SizedBox(height: 20), // Spasi antara tombol Daftar dan Back
-                            TextButton(
-                              onPressed: () => Get.back(), // Menggunakan Get.back() untuk kembali
-                              child: Text(
-                                'Sudah punya akun? Kembali ke Login',
-                                style: TextStyle(
-                                  color: Colors.purple,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: screenHeight * 0.02), // Spasi di bagian paling bawah
-                          ],
-                        ),
+                        SizedBox(height: screenHeight * 0.02),
                       ],
                     ),
                   ),
@@ -266,41 +215,92 @@ class _RegisterScreenState extends State<RegisterScreen> {
         controller: controller,
         obscureText: obscure,
         keyboardType: keyboardType,
-        validator: validator ??
-            (value) {
-              if (value == null || value.isEmpty) {
-                return '$hint tidak boleh kosong';
-              }
-              return null;
-            },
+        validator: validator ?? (value) => (value == null || value.isEmpty) ? '$hint tidak boleh kosong' : null,
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: const TextStyle(color: Colors.grey),
           filled: true,
           fillColor: const Color(0xFFF0F0F0),
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+          contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide.none,
           ),
-          enabledBorder: OutlineInputBorder( // Tambah enabledBorder untuk konsistensi visual
+          focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide.none,
+            borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
           ),
-          focusedBorder: OutlineInputBorder( // Tambah focusedBorder
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Colors.purple, width: 2), // Contoh focus color
-          ),
-          errorBorder: OutlineInputBorder( // Tambah errorBorder
+          errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: const BorderSide(color: Colors.red, width: 2),
           ),
-          focusedErrorBorder: OutlineInputBorder( // Tambah focusedErrorBorder
+          focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: const BorderSide(color: Colors.red, width: 2),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPhoneInput() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: 56,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0F0F0),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.grey.shade400),
+            ),
+            alignment: Alignment.center,
+            child: const Text(
+              '+62',
+              style: TextStyle(color: Colors.black87),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: TextFormField(
+              controller: _teleponController,
+              keyboardType: TextInputType.phone,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Nomor HP tidak boleh kosong';
+                }
+                if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                  return 'Nomor HP hanya boleh angka';
+                }
+                return null;
+              },
+              decoration: InputDecoration(
+                hintText: 'Nomor HP',
+                filled: true,
+                fillColor: const Color(0xFFF0F0F0),
+                contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.red, width: 2),
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.red, width: 2),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

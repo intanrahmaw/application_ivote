@@ -9,7 +9,7 @@ import 'package:application_ivote/screens/splash_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-    // Inisialisasi GetStorage
+  // Inisialisasi GetStorage
   await GetStorage.init();
 
   // Inisialisasi Supabase
@@ -33,8 +33,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       initialRoute: AppRoutes.splash,
-      getPages: AppRoutes.routes, 
-      home: SplashScreen(),
+      getPages: AppRoutes.routes,
+      // home: SplashScreen(), // BARIS INI DIHAPUS
     );
   }
 }

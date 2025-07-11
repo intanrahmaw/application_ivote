@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:application_ivote/widgets/custom_bottom_nav_bar_user.dart';
+import 'package:application_ivote/widgets/custom_bottom_nav_bar_admin.dart';
 import 'package:application_ivote/utils/global_user.dart';
 import 'package:application_ivote/screens/vote/vote_screen.dart';
 
@@ -17,18 +18,88 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _onItemTapped(int index) {
     if (index == _selectedIndex) return;
 
-    switch (index) {
-      case 0:
-        // Tetap di DashboardScreen
-        break;
-      case 1:
-        Get.off(const VoteScreen());
-        break;
+    if (loggedInUserRole == 'admin') {
+      switch (index) {
+        case 0:
+          // Tetap di Dashboard
+          break;
+        case 1:
+          _showSettingsMenu();
+          return;
+        case 2:
+          Get.toNamed('/admin/hasil-vote');
+          return;
+        case 3:
+          Get.toNamed('/admin/profil');
+          return;
+      }
+    } else {
+      switch (index) {
+        case 0:
+          // Tetap di Dashboard
+          break;
+        case 1:
+          Get.off(const VoteScreen());
+          break;
+      }
     }
+
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  void _showSettingsMenu() {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: true,
+      enableDrag: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return ListView(
+          shrinkWrap: true,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('User Management'),
+              onTap: () {
+                Navigator.pop(context);
+                Get.toNamed('/admin/users');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.group),
+              title: const Text('Kandidat'),
+              onTap: () {
+                Navigator.pop(context);
+                Get.toNamed('/admin/kandidat');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.how_to_vote),
+              title: const Text('Election'),
+              onTap: () {
+                Navigator.pop(context);
+                Get.toNamed('/admin/election');
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    // Handle loading jika belum login
+    if (loggedInUserRole.isEmpty) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: const Padding(
@@ -38,7 +109,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Icon(Icons.person, color: Colors.white),
           ),
         ),
-        title: Text(loggedInUserName.isNotEmpty ? loggedInUserName : 'Pengguna'),
+        title: Text(
+          ' ${loggedInUserName.isNotEmpty ? loggedInUserName.capitalizeFirst! : 'Pengguna'}',
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4.0),
           child: Container(
@@ -67,10 +144,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBarUser(
-        selectedIndex: _selectedIndex,
-        onItemTapped: _onItemTapped,
-      ),
+      bottomNavigationBar: loggedInUserRole == 'admin'
+          ? CustomBottomNavBarAdmin(
+              selectedIndex: _selectedIndex,
+              onItemTapped: _onItemTapped,
+            )
+          : CustomBottomNavBarUser(
+              selectedIndex: _selectedIndex,
+              onItemTapped: _onItemTapped,
+            ),
     );
   }
 

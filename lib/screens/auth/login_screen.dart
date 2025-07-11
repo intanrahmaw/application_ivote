@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../main.dart';
-import '../../utils/app_routes.dart';
 import '../../utils/global_user.dart';
+import '../home/dashboard_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -20,60 +20,55 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   bool _isLoading = false;
 
+  static const String _defaultAdminUsername = 'Admin';
+  static const String _defaultAdminPassword = 'admin123';
+
   Future<void> _signIn() async {
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
     if (username.isEmpty || password.isEmpty) {
-      Get.snackbar(
-        'Peringatan',
-        'Username dan password tidak boleh kosong',
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
-      );
+      Get.snackbar('Peringatan', 'Username dan password tidak boleh kosong',
+          backgroundColor: Colors.orange, colorText: Colors.white);
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
+      if (username == _defaultAdminUsername && password == _defaultAdminPassword) {
+        loggedInUserName = 'Admin';
+        loggedInUserRole = 'admin';
+        Get.snackbar('Login Berhasil', 'Selamat datang, Admin!',
+            backgroundColor: Colors.green, colorText: Colors.white);
+        Get.offAll(() => const DashboardScreen());
+        return;
+      }
+
       final response = await supabase
           .from('users')
-          .select()
+          .select('nama')
           .eq('username', username)
           .eq('password', password)
           .maybeSingle();
 
       if (response == null) {
-        Get.snackbar(
-          'Login Gagal',
-          'Username atau password salah',
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        Get.snackbar('Login Gagal', 'Username atau password salah',
+            backgroundColor: Colors.red, colorText: Colors.white);
         return;
       }
 
       final nama = response['nama'] ?? 'Pengguna';
-
       loggedInUserName = nama;
+      loggedInUserRole = 'user';
 
-      Get.snackbar(
-        'Berhasil Login',
-        'Selamat datang, $nama!',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      Get.snackbar('Berhasil Login', 'Selamat datang, $nama!',
+          backgroundColor: Colors.green, colorText: Colors.white);
 
-      Get.offAllNamed(AppRoutes.dashboard);
+      Get.offAll(() => const DashboardScreen());
     } catch (e) {
-      debugPrint('Login Error: $e');
-      Get.snackbar(
-        'Error',
-        'Terjadi kesalahan: $e',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Get.snackbar('Error', 'Terjadi kesalahan saat login: $e',
+          backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -90,6 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
+    final screenWidth = mediaQuery.size.width;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -98,119 +94,104 @@ class _LoginScreenState extends State<LoginScreen> {
           builder: (context, constraints) {
             return SingleChildScrollView(
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Column(
-                        children: [
-                          Image.asset('assets/Image/logo.png', height: 200),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'WELCOME TO I-VOTE',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                        ],
+                      SizedBox(height: screenHeight * 0.04),
+                      Image.asset('assets/Image/logo.png', height: screenHeight * 0.3),
+                      SizedBox(height: screenHeight * 0.02),
+                      const Text(
+                        'WELCOME TO iVOTE',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
                       ),
-                      Column(
-                        children: [
-                          const SizedBox(height: 32),
-                          TextField(
-                            controller: _usernameController,
-                            decoration: InputDecoration(
-                              labelText: 'Username',
-                              prefixIcon: const Icon(Icons.person_outline),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
+                      SizedBox(height: screenHeight * 0.04),
+                      TextField(
+                        controller: _usernameController,
+                        decoration: InputDecoration(
+                          labelText: 'Username',
+                          prefixIcon: const Icon(Icons.person),
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          const SizedBox(height: 16),
-                          TextField(
-                            controller: _passwordController,
-                            obscureText: _obscurePassword,
-                            decoration: InputDecoration(
-                              labelText: 'Password',
-                              prefixIcon: const Icon(Icons.lock_outline),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscurePassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
-                                },
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                      Column(
-                        children: [
-                          const SizedBox(height: 50),
-                          _isLoading
-                              ? const CircularProgressIndicator(
-                                  color: Colors.deepPurple,
-                                )
-                              : SizedBox(
-                                  width: double.infinity,
-                                  height: 50,
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.deepPurple,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    onPressed: _signIn,
-                                    child: const Text(
-                                      'LOGIN',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                        letterSpacing: 1,
-                                      ),
-                                    ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon: const Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            ),
+                            onPressed: () {
+                              setState(() => _obscurePassword = !_obscurePassword);
+                            },
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.05),
+                      _isLoading
+                          ? const CircularProgressIndicator(color: Colors.deepPurple)
+                          : SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: ElevatedButton(
+                                onPressed: _signIn,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.deepPurple,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                          const SizedBox(height: 15),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: OutlinedButton(
-                              style: OutlinedButton.styleFrom(
-                                side: const BorderSide(color: Colors.deepPurple),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              onPressed: () => Get.to(() => const RegisterScreen()),
-                              child: const Text(
-                                'Create Account',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.deepPurple,
+                                child: const Text(
+                                  'LOGIN',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    letterSpacing: 1,
+                                  ),
                                 ),
                               ),
                             ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: OutlinedButton(
+                          onPressed: () => Get.to(() => const RegisterScreen()),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.deepPurple),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                        ],
+                          child: const Text(
+                            'Create Account',
+                            style: TextStyle(
+                              color: Colors.deepPurple,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
                       ),
+                      SizedBox(height: screenHeight * 0.04),
                     ],
                   ),
                 ),
