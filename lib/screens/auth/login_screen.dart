@@ -20,9 +20,6 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   bool _isLoading = false;
 
-  static const String _defaultAdminUsername = 'Admin';
-  static const String _defaultAdminPassword = 'admin123';
-
   Future<void> _signIn() async {
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
@@ -36,33 +33,44 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      if (username == _defaultAdminUsername && password == _defaultAdminPassword) {
-        loggedInUserName = 'Admin';
+      // Cek apakah data cocok di tabel admin
+      final adminResponse = await supabase
+          .from('admin')
+          .select('admin_id, nama')
+          .eq('username', username)
+          .eq('password', password)
+          .maybeSingle();
+
+      if (adminResponse != null) {
+        final namaAdmin = adminResponse['nama'] ?? 'Admin';
+        loggedInUserName = namaAdmin;
         loggedInUserRole = 'admin';
-        Get.snackbar('Login Berhasil', 'Selamat datang, Admin!',
+
+        Get.snackbar('Login Berhasil', 'Selamat datang, $namaAdmin!',
             backgroundColor: Colors.green, colorText: Colors.white);
         Get.offAll(() => const DashboardScreen());
         return;
       }
 
-      final response = await supabase
+      // Jika bukan admin, coba cek tabel users
+      final userResponse = await supabase
           .from('users')
           .select('nama')
           .eq('username', username)
           .eq('password', password)
           .maybeSingle();
 
-      if (response == null) {
+      if (userResponse == null) {
         Get.snackbar('Login Gagal', 'Username atau password salah',
             backgroundColor: Colors.red, colorText: Colors.white);
         return;
       }
 
-      final nama = response['nama'] ?? 'Pengguna';
-      loggedInUserName = nama;
+      final namaUser = userResponse['nama'] ?? 'Pengguna';
+      loggedInUserName = namaUser;
       loggedInUserRole = 'user';
 
-      Get.snackbar('Berhasil Login', 'Selamat datang, $nama!',
+      Get.snackbar('Berhasil Login', 'Selamat datang, $namaUser!',
           backgroundColor: Colors.green, colorText: Colors.white);
 
       Get.offAll(() => const DashboardScreen());
