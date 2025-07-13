@@ -15,7 +15,7 @@ class ElectionListScreen extends StatefulWidget {
 
 class _ElectionListScreenState extends State<ElectionListScreen> {
   final SupabaseService _supabaseService = SupabaseService();
-  List<Election> _electionList = [];
+  List<Elections> _electionList = [];
   bool _isLoading = true;
 
   @override
@@ -29,7 +29,7 @@ class _ElectionListScreenState extends State<ElectionListScreen> {
     try {
       final data = await _supabaseService.getElections();
       setState(() {
-       _electionList = data.map((e) => Election.fromJson(e)).toList(); // ✅ AMAN
+       _electionList = data.map((e) => Elections.fromJson(e)).toList(); // ✅ AMAN
 
       });
     } catch (e) {
@@ -66,7 +66,7 @@ class _ElectionListScreenState extends State<ElectionListScreen> {
     );
   }
 
-  void _navigateAndRefresh({Election? election}) async {
+  void _navigateAndRefresh({Elections? election}) async {
   final result = await Get.to(() => ElectionFormScreen(election: election));
   if (result == true) _fetchelections();
 }

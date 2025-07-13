@@ -1,7 +1,7 @@
+import 'dart:math';
+
 import 'package:application_ivote/main.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
-
 
 class SupabaseService {
   // ==========================
@@ -9,40 +9,55 @@ class SupabaseService {
   // ==========================
 
   Future<List<Map<String, dynamic>>> getElections() async {
-    final response = await supabase.from('election').select();
+    final response = await supabase.from('elections').select();
     return response;
   }
 
   Future<void> deleteElection(String electionId) async {
-    await supabase.from('election').delete().eq('id', electionId);
+    await supabase.from('elections').delete().eq('elections_id', electionId);
   }
 
   Future<void> addElection({
-    required String nama,
+    required String judul,
     required String deskripsi,
-    required DateTime tanggalMulai,
-    required DateTime tanggalSelesai,
+    required DateTime startTime,
+    required DateTime endTime,
+    bool isActive = true,
   }) async {
-    await supabase.from('election').insert({
-      'nama': nama,
+    await supabase.from('elections').insert({
+      'judul': judul,
       'deskripsi': deskripsi,
-      'tanggal_mulai': tanggalMulai.toIso8601String(),
-      'tanggal_selesai': tanggalSelesai.toIso8601String(),
+      'start_time': startTime.toIso8601String(),
+      'end_time': endTime.toIso8601String(),
+      'is_active': isActive,
+      // 'created_at' biasanya otomatis dari Supabase, jadi tidak perlu dikirim manual
     });
   }
 
-  Future<void> updateElection({
-    required String electionId,
-    required String nama,
-    required String deskripsi,
-    required DateTime tanggalMulai,
-    required DateTime tanggalSelesai,
-  }) async {
-    await supabase.from('election').update({
-      'nama': nama,
-      'deskripsi': deskripsi,
-      'tanggal_mulai': tanggalMulai.toIso8601String(),
-      'tanggal_selesai': tanggalSelesai.toIso8601String(),
-    }).eq('id', electionId);
+ Future<void> updateElection({
+  required String electionId,
+  required String judul,
+  required String deskripsi,
+  required DateTime startTime,
+  required DateTime endTime,
+  required bool isActive,
+}) async {
+  final updates = {
+    'judul': judul,
+    'deskripsi': deskripsi,
+    'start_time': startTime.toIso8601String(),
+    'end_time': endTime.toIso8601String(),
+    'is_active': isActive,
+  };
+
+  final response = await supabase
+      .from('elections')
+      .update(updates)
+      .eq('elections_id', electionId)
+      .select(); // tambahkan select untuk cek hasil update
+
+  if (response.isEmpty) {
+    throw Exception('Gagal update: data tidak ditemukan atau tidak berubah.');
   }
+}
 }

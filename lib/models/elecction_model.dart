@@ -1,4 +1,4 @@
-class Election {
+class Elections {
   final String electionId;
   final String judul;
   final String deskripsi;
@@ -6,7 +6,7 @@ class Election {
   final DateTime endTime;
   final bool isActive;
 
-  Election({
+  Elections({
     required this.electionId,
     required this.judul,
     required this.deskripsi,
@@ -15,13 +15,13 @@ class Election {
     required this.isActive,
   });
 
-   factory Election.fromJson(Map<String, dynamic> json) {
-    return Election(
-      electionId: json['id'].toString(),
-      judul: json['nama'],
+   factory Elections.fromJson(Map<String, dynamic> json) {
+    return Elections(
+      electionId: json['elections_id'].toString(),
+      judul: json['judul'],
       deskripsi: json['deskripsi'],
-      startTime: DateTime.parse(json['tanggal_mulai']),
-      endTime: DateTime.parse(json['tanggal_selesai']),
+      startTime: DateTime.parse(json['start_time']),
+      endTime: DateTime.parse(json['end_time']),
       isActive: json['is_active'] ?? false,
     );
    }

@@ -2,8 +2,8 @@ import 'package:application_ivote/models/elecction_model.dart';
 import 'package:flutter/material.dart';
 
 class ElectionListTable extends StatelessWidget {
-  final List<Election> elections;
-  final void Function(Election election) onEdit;
+  final List<Elections> elections;
+  final void Function(Elections election) onEdit;
   final void Function(String electionId) onDelete;
 
   const ElectionListTable({

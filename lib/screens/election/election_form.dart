@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:application_ivote/service/supabase_service.dart';
 
 class ElectionFormScreen extends StatefulWidget {
-  final Election? election;
+  final Elections? election;
 
   const ElectionFormScreen({super.key, this.election});
 
@@ -42,20 +42,19 @@ class _ElectionFormScreenState extends State<ElectionFormScreen> {
     try {
       if (widget.election == null) {
         await service.addElection(
-          nama: _judulController.text,
+          judul: _judulController.text,
           deskripsi: _deskripsiController.text,
-          tanggalMulai: _startTime!,
-          tanggalSelesai: _endTime!,
-        );
-        Get.snackbar('Sukses', 'Pemilu berhasil ditambahkan',
-            backgroundColor: Colors.green, colorText: Colors.white);
+          startTime: _startTime!,
+          endTime: _endTime!,
+        ); 
       } else {
         await service.updateElection(
           electionId: widget.election!.electionId,
-          nama: _judulController.text,
+          judul: _judulController.text,
           deskripsi: _deskripsiController.text,
-          tanggalMulai: _startTime!,
-          tanggalSelesai: _endTime!,
+          startTime: _startTime!,
+          endTime: _endTime!,
+          isActive: _isActive,
         );
         Get.snackbar('Sukses', 'Pemilu berhasil diperbarui',
             backgroundColor: Colors.green, colorText: Colors.white);
@@ -111,7 +110,7 @@ class _ElectionFormScreenState extends State<ElectionFormScreen> {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.purple),
-          onPressed: () => Get.back(),
+          onPressed: () => Get.back(result: true),
         ),
       ),
       body: SingleChildScrollView(
