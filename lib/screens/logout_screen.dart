@@ -3,14 +3,14 @@ import 'package:application_ivote/screens/profil_screen.dart';
 import 'package:application_ivote/screens/edit_profil_screen.dart';
 import 'package:application_ivote/widgets/bottom_navbar.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+class LogoutScreen extends StatefulWidget {
+  const LogoutScreen({Key? key}) : super(key: key);
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<LogoutScreen> createState() => _LogoutScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _LogoutScreenState extends State<LogoutScreen> {
   int _selectedIndex = 3; // Index untuk 'Profile'
 
   void _onItemTapped(int index) {
