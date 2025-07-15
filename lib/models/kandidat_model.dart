@@ -4,9 +4,9 @@ class Candidate {
   final String nama;
   final String visi;
   final String misi;
-  final String foto;
   final DateTime created;
   final DateTime updated;
+  final String? foto;
 
   Candidate({
     required this.candidateId,
@@ -14,36 +14,26 @@ class Candidate {
     required this.nama,
     required this.visi,
     required this.misi,
-    required this.foto,
     required this.created,
     required this.updated,
+    this.foto,
   });
 
-  // Convert from Supabase JSON
-  factory Candidate.fromMap(Map<String, dynamic> map) {
-    return Candidate(
-      candidateId: map['candidate_id'] ?? '',
-      electionId: map['election_id'] ?? '',
-      nama: map['nama'] ?? '',
-      visi: map['visi'] ?? '',
-      misi: map['misi'] ?? '',
-      foto: map['foto'] ?? '',
-      created: DateTime.parse(map['created_at']),
-      updated: DateTime.parse(map['updated_at']),
-    );
-  }
+ factory Candidate.fromMap(Map<String, dynamic> map) {
+  return Candidate(
+    candidateId: map['candidate_id'] ?? '',
+    electionId: map['election_id'] ?? '',
+    nama: map['nama'] ?? '',
+    visi: map['visi'] ?? '',
+    misi: map['misi'] ?? '',
+    foto: map['foto'] ?? '',
+    created: map['created_at'] != null
+        ? DateTime.parse(map['created_at'])
+        : DateTime.now(),
+    updated: map['updated_at'] != null
+        ? DateTime.parse(map['updated_at'])
+        : DateTime.now(),
+  );
+}
 
-  // Convert to Map for insertion/update
-  Map<String, dynamic> toMap() {
-    return {
-      'candidate_id': candidateId,
-      'election_id': electionId,
-      'nama': nama,
-      'visi': visi,
-      'misi': misi,
-      'foto': foto,
-      'created_at': created.toIso8601String(),
-      'updated_at': updated.toIso8601String(),
-    };
-  }
 }

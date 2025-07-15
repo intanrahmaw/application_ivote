@@ -7,7 +7,8 @@ import 'package:application_ivote/models/kandidat_model.dart';
 import 'package:application_ivote/service/supabase_service.dart';
 
 class CandidateFormScreen extends StatefulWidget {
-  const CandidateFormScreen({super.key});
+  final Candidate? candidate;
+  const CandidateFormScreen({super.key, this.candidate});
 
   @override
   State<CandidateFormScreen> createState() => _CandidateFormScreenState();

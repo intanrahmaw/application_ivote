@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:application_ivote/screens/home/kandidat_form_screen.dart';
 import 'package:application_ivote/service/supabase_service.dart';
 import 'package:application_ivote/models/kandidat_model.dart';
-import '../../utilis/constants.dart';
 
 class KandidatListScreen extends StatefulWidget {
   const KandidatListScreen({super.key});
@@ -25,16 +24,19 @@ class _KandidatListScreenState extends State<KandidatListScreen> {
   Future<void> _fetchKandidatList() async {
     setState(() => _isLoading = true);
     try {
-      final result = await _supabaseService.fetchCandidates();
+      final result = await _supabaseService.getCandidates();
       _kandidatList = result.map((item) => Candidate.fromMap(item)).toList();
     } catch (e) {
       debugPrint('Gagal fetch kandidat: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Gagal memuat data kandidat'),
-        backgroundColor: Colors.red,
-      ));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal memuat data kandidat: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -42,7 +44,7 @@ class _KandidatListScreenState extends State<KandidatListScreen> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CandidateFormScreen(),
+        builder: (context) => CandidateFormScreen(candidate: kandidat),
       ),
     );
     if (result == true) {
@@ -102,6 +104,7 @@ class _KandidatListScreenState extends State<KandidatListScreen> {
       await _supabaseService.deleteCandidate(candidateId);
       _fetchKandidatList();
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Gagal menghapus kandidat: $e'),
         backgroundColor: Colors.red,
@@ -123,7 +126,6 @@ class _KandidatListScreenState extends State<KandidatListScreen> {
         children: [
           Expanded(flex: 1, child: Text('No', style: TextStyle(fontWeight: FontWeight.bold))),
           Expanded(flex: 3, child: Text('Nama', style: TextStyle(fontWeight: FontWeight.bold))),
-          Expanded(flex: 3, child: Text('Prodi', style: TextStyle(fontWeight: FontWeight.bold))),
           Expanded(flex: 3, child: Text('Visi', style: TextStyle(fontWeight: FontWeight.bold))),
           Expanded(flex: 3, child: Text('Misi', style: TextStyle(fontWeight: FontWeight.bold))),
           Expanded(flex: 2, child: Center(child: Text('Foto', style: TextStyle(fontWeight: FontWeight.bold)))),
@@ -144,11 +146,12 @@ class _KandidatListScreenState extends State<KandidatListScreen> {
           Expanded(flex: 1, child: Text((index + 1).toString())),
           Expanded(flex: 3, child: Text(kandidat.nama)),
           Expanded(flex: 3, child: Text(kandidat.visi, maxLines: 1, overflow: TextOverflow.ellipsis)),
+          Expanded(flex: 3, child: Text(kandidat.misi, maxLines: 1, overflow: TextOverflow.ellipsis)),
           Expanded(
             flex: 2,
             child: Center(
-              child: kandidat.foto.isNotEmpty
-                  ? Image.network(kandidat.foto, width: 50, height: 50, fit: BoxFit.cover)
+              child: (kandidat.foto != null && kandidat.foto!.isNotEmpty)
+                  ? Image.network(kandidat.foto!, width: 50, height: 50, fit: BoxFit.cover)
                   : const Icon(Icons.image_outlined, color: Colors.grey),
             ),
           ),
