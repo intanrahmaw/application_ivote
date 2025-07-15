@@ -150,8 +150,8 @@ class _KandidatListScreenState extends State<KandidatListScreen> {
           Expanded(
             flex: 2,
             child: Center(
-              child: (kandidat.foto != null && kandidat.foto!.isNotEmpty)
-                  ? Image.network(kandidat.foto!, width: 50, height: 50, fit: BoxFit.cover)
+              child: (kandidat.imageUrl != null && kandidat.imageUrl!.isNotEmpty)
+                  ? Image.network(kandidat.imageUrl!, width: 50, height: 50, fit: BoxFit.cover)
                   : const Icon(Icons.image_outlined, color: Colors.grey),
             ),
           ),

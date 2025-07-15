@@ -1,10 +1,21 @@
 import 'package:application_ivote/screens/home/kandidat_form_screen.dart';
 import 'package:application_ivote/screens/home/kandidat_list_screen.dart';
-import 'package:application_ivote/widgets/custom_bottom_nav_bar_user.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; 
+import 'package:application_ivote/utilis/constants.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  // Inisialisasi GetStorage
+  await GetStorage.init();
+
+  // Inisialisasi Supabase
+  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
   runApp(const MyApp());
+  
+  
 }
 
 class MyApp extends StatelessWidget {
@@ -12,12 +23,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return (GetMaterialApp(
       title: 'iVote',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: KandidatListScreen(),
-    );
+    ));
   }
 }

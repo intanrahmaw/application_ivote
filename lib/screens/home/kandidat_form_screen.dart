@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:application_ivote/models/kandidat_model.dart';
 import 'package:application_ivote/service/supabase_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CandidateFormScreen extends StatefulWidget {
   final Candidate? candidate;
@@ -27,6 +28,7 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
   Candidate? _existingCandidate;
   XFile? _imageFile;
   String? _existingImageUrl;
+  List<Map<String, dynamic>> _elections = [];
 
   @override
   void initState() {
@@ -37,8 +39,19 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
       _visiController.text = _existingCandidate!.visi;
       _misiController.text = _existingCandidate!.misi;
       _electionId = _existingCandidate!.electionId;
-      _existingImageUrl = _existingCandidate!.foto;
+      _existingImageUrl = _existingCandidate!.imageUrl;
     }
+    _loadElections();
+  }
+
+  Future<void> _loadElections() async {
+    final response = await Supabase.instance.client
+        .from('election')
+        .select('id, nama_pemilihan');
+
+    setState(() {
+      _elections = List<Map<String, dynamic>>.from(response);
+    });
   }
 
   Future<void> _pickImage() async {
@@ -66,14 +79,14 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
             final imageBytes = await _imageFile!.readAsBytes();
             imageUrl = await _supabaseService.uploadImageBytes(
               imageBytes,
-              'candidates-images',
+              'candidate-image',
               fileName,
             );
           } else {
             final file = File(_imageFile!.path);
             imageUrl = await _supabaseService.uploadImage(
               file,
-              'candidates-images',
+              'candidate-image',
               fileName,
             );
           }
@@ -86,7 +99,7 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
             nama: _namaController.text,
             visi: _visiController.text,
             misi: _misiController.text,
-            fotoUrl: imageUrl,
+            imageUrl: imageUrl,
           );
         } else {
           await _supabaseService.addCandidate(
@@ -94,7 +107,7 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
             nama: _namaController.text,
             visi: _visiController.text,
             misi: _misiController.text,
-            fotoUrl: imageUrl,
+            imageUrl: imageUrl,
           );
         }
 
@@ -117,133 +130,151 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
   }
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: Text(_existingCandidate == null ? 'Tambah Kandidat' : 'Edit Kandidat'),
-      centerTitle: true,
-      backgroundColor: Colors.deepPurple,
-      foregroundColor: Colors.white,
-    ),
-    body: SingleChildScrollView(
-      padding: const EdgeInsets.all(20.0),
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                const Text(
-                  'Form Kandidat',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepPurple,
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title:
+            Text(_existingCandidate == null ? 'Tambah Kandidat' : 'Edit Kandidat'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Card(
+          elevation: 4,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  const Text(
+                    'Form Kandidat',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepPurple,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                // Gambar preview
-                _imageFile != null
-                    ? (kIsWeb
-                        ? Image.network(_imageFile!.path, height: 160, fit: BoxFit.cover)
-                        : Image.file(File(_imageFile!.path), height: 160, fit: BoxFit.cover))
-                    : (_existingImageUrl != null
-                        ? Image.network(_existingImageUrl!, height: 160, fit: BoxFit.cover)
-                        : Container(
-                            height: 160,
-                            color: Colors.grey[200],
-                            child: const Center(
-                              child: Icon(Icons.image, size: 60, color: Colors.grey),
-                            ),
-                          )),
-                const SizedBox(height: 10),
-                OutlinedButton.icon(
-                  onPressed: _pickImage,
-                  icon: const Icon(Icons.image_outlined),
-                  label: const Text('Pilih Foto Kandidat'),
-                ),
-                const SizedBox(height: 24),
-
-                // Nama
-                TextFormField(
-                  controller: _namaController,
-                  decoration: InputDecoration(
-                    labelText: 'Nama Kandidat',
-                    border: OutlineInputBorder(),
+                  // Gambar preview
+                  _imageFile != null
+                      ? (kIsWeb
+                          ? Image.network(_imageFile!.path,
+                              height: 160, fit: BoxFit.cover)
+                          : Image.file(File(_imageFile!.path),
+                              height: 160, fit: BoxFit.cover))
+                      : (_existingImageUrl != null
+                          ? Image.network(_existingImageUrl!,
+                              height: 160, fit: BoxFit.cover)
+                          : Container(
+                              height: 160,
+                              color: Colors.grey[200],
+                              child: const Center(
+                                child:
+                                    Icon(Icons.image, size: 60, color: Colors.grey),
+                              ),
+                            )),
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: _pickImage,
+                    icon: const Icon(Icons.image_outlined),
+                    label: const Text('Pilih Foto Kandidat'),
                   ),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Nama tidak boleh kosong' : null,
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 24),
 
-                // Visi
-                TextFormField(
-                  controller: _visiController,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    labelText: 'Visi',
-                    border: OutlineInputBorder(),
+                  // Nama
+                  TextFormField(
+                    controller: _namaController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nama Kandidat',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) =>
+                        value!.isEmpty ? 'Nama tidak boleh kosong' : null,
                   ),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Visi tidak boleh kosong' : null,
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // Misi
-                TextFormField(
-                  controller: _misiController,
-                  maxLines: 5,
-                  decoration: InputDecoration(
-                    labelText: 'Misi',
-                    border: OutlineInputBorder(),
+                  // Visi
+                  TextFormField(
+                    controller: _visiController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      labelText: 'Visi',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) =>
+                        value!.isEmpty ? 'Visi tidak boleh kosong' : null,
                   ),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Misi tidak boleh kosong' : null,
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // ID Pemilihan
-                TextFormField(
-                  initialValue: _electionId,
-                  decoration: InputDecoration(
-                    labelText: 'ID Pemilihan',
-                    border: OutlineInputBorder(),
+                  // Misi
+                  TextFormField(
+                    controller: _misiController,
+                    maxLines: 5,
+                    decoration: const InputDecoration(
+                      labelText: 'Misi',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) =>
+                        value!.isEmpty ? 'Misi tidak boleh kosong' : null,
                   ),
-                  onChanged: (val) => _electionId = val,
-                  validator: (value) =>
-                      value == null || value.isEmpty ? 'ID Pemilihan wajib diisi' : null,
-                ),
-                const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
-                _isLoading
-                    ? const CircularProgressIndicator()
-                    : SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: _submit,
-                          icon: const Icon(Icons.save),
-                          label: const Text('Simpan Kandidat'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            backgroundColor: Colors.deepPurple,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                  // Dropdown Pemilihan
+                  DropdownButtonFormField<String>(
+                    value: _electionId,
+                    items: _elections.map((e) {
+                      return DropdownMenuItem<String>(
+                        value: e['id'],
+                        child: Text(e['nama_pemilihan']),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      setState(() {
+                        _electionId = val;
+                      });
+                    },
+                    validator: (value) =>
+                        value == null || value.isEmpty
+                            ? 'Pilih pemilihan terlebih dahulu'
+                            : null,
+                    decoration: const InputDecoration(
+                      labelText: 'Pilih Pemilihan',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  _isLoading
+                      ? const CircularProgressIndicator()
+                      : SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: _submit,
+                            icon: const Icon(Icons.save),
+                            label: const Text('Simpan Kandidat'),
+                            style: ElevatedButton.styleFrom(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 16),
+                              backgroundColor: Colors.deepPurple,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
-}
-

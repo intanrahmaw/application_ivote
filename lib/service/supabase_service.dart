@@ -26,14 +26,14 @@ class SupabaseService {
     required String nama,
     required String visi,
     required String misi,
-    String? fotoUrl,
+    String? imageUrl
   }) async {
     await supabase.from('candidates').insert({
       'election_id': electionId,
       'nama': nama,
       'visi': visi,
       'misi': misi,
-      'foto': fotoUrl,
+      'image_url': imageUrl,
     });
   }
 
@@ -44,14 +44,14 @@ class SupabaseService {
     required String nama,
     required String visi,
     required String misi,
-    String? fotoUrl,
+    String? imageUrl,
   }) async {
     final updates = {
       'election_id': electionId,
       'nama': nama,
       'visi': visi,
       'misi': misi,
-      'foto': fotoUrl,
+      'image_url': imageUrl,
       'updated_at': DateTime.now().toIso8601String(),
     };
 

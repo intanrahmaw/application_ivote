@@ -6,7 +6,7 @@ class Candidate {
   final String misi;
   final DateTime created;
   final DateTime updated;
-  final String? foto;
+  final String? imageUrl;
 
   Candidate({
     required this.candidateId,
@@ -16,7 +16,7 @@ class Candidate {
     required this.misi,
     required this.created,
     required this.updated,
-    this.foto,
+    this.imageUrl,
   });
 
  factory Candidate.fromMap(Map<String, dynamic> map) {
@@ -26,7 +26,7 @@ class Candidate {
     nama: map['nama'] ?? '',
     visi: map['visi'] ?? '',
     misi: map['misi'] ?? '',
-    foto: map['foto'] ?? '',
+    imageUrl: map['image_url'] ?? '',
     created: map['created_at'] != null
         ? DateTime.parse(map['created_at'])
         : DateTime.now(),
