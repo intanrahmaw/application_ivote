@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:application_ivote/screens/home/kandidat_form_screen.dart';
 import 'package:application_ivote/service/supabase_service.dart';
 import 'package:application_ivote/models/kandidat_model.dart';
+import '../../utilis/constants.dart';
 
 class KandidatListScreen extends StatefulWidget {
   const KandidatListScreen({super.key});
@@ -122,7 +123,9 @@ class _KandidatListScreenState extends State<KandidatListScreen> {
         children: [
           Expanded(flex: 1, child: Text('No', style: TextStyle(fontWeight: FontWeight.bold))),
           Expanded(flex: 3, child: Text('Nama', style: TextStyle(fontWeight: FontWeight.bold))),
+          Expanded(flex: 3, child: Text('Prodi', style: TextStyle(fontWeight: FontWeight.bold))),
           Expanded(flex: 3, child: Text('Visi', style: TextStyle(fontWeight: FontWeight.bold))),
+          Expanded(flex: 3, child: Text('Misi', style: TextStyle(fontWeight: FontWeight.bold))),
           Expanded(flex: 2, child: Center(child: Text('Foto', style: TextStyle(fontWeight: FontWeight.bold)))),
           Expanded(flex: 3, child: Center(child: Text('Aksi', style: TextStyle(fontWeight: FontWeight.bold)))),
         ],

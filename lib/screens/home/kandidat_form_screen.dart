@@ -116,80 +116,133 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_existingCandidate == null ? 'Tambah Kandidat' : 'Edit Kandidat'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              // Gambar preview
-              _imageFile != null
-                  ? (kIsWeb
-                      ? Image.network(_imageFile!.path, height: 150)
-                      : Image.file(File(_imageFile!.path), height: 150))
-                  : (_existingImageUrl != null
-                      ? Image.network(_existingImageUrl!, height: 150)
-                      : Container(
-                          height: 150,
-                          color: Colors.grey[200],
-                          child: const Icon(Icons.image, size: 50),
-                        )),
-              TextButton.icon(
-                onPressed: _pickImage,
-                icon: const Icon(Icons.image),
-                label: const Text('Pilih Foto Kandidat'),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _namaController,
-                decoration: const InputDecoration(labelText: 'Nama Kandidat'),
-                validator: (value) =>
-                    value!.isEmpty ? 'Nama tidak boleh kosong' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _visiController,
-                decoration: const InputDecoration(labelText: 'Visi'),
-                maxLines: 3,
-                validator: (value) =>
-                    value!.isEmpty ? 'Visi tidak boleh kosong' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _misiController,
-                decoration: const InputDecoration(labelText: 'Misi'),
-                maxLines: 5,
-                validator: (value) =>
-                    value!.isEmpty ? 'Misi tidak boleh kosong' : null,
-              ),
-              const SizedBox(height: 16),
-              // Input manual electionId (bisa diganti dropdown kalau perlu)
-              TextFormField(
-                initialValue: _electionId,
-                decoration: const InputDecoration(labelText: 'ID Pemilihan'),
-                onChanged: (val) => _electionId = val,
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'ID Pemilihan wajib diisi' : null,
-              ),
-              const SizedBox(height: 24),
-              _isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton.icon(
-                      onPressed: _submit,
-                      icon: const Icon(Icons.save),
-                      label: const Text('Simpan Kandidat'),
-                      style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16)),
-                    ),
-            ],
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Text(_existingCandidate == null ? 'Tambah Kandidat' : 'Edit Kandidat'),
+      centerTitle: true,
+      backgroundColor: Colors.deepPurple,
+      foregroundColor: Colors.white,
+    ),
+    body: SingleChildScrollView(
+      padding: const EdgeInsets.all(20.0),
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                const Text(
+                  'Form Kandidat',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Gambar preview
+                _imageFile != null
+                    ? (kIsWeb
+                        ? Image.network(_imageFile!.path, height: 160, fit: BoxFit.cover)
+                        : Image.file(File(_imageFile!.path), height: 160, fit: BoxFit.cover))
+                    : (_existingImageUrl != null
+                        ? Image.network(_existingImageUrl!, height: 160, fit: BoxFit.cover)
+                        : Container(
+                            height: 160,
+                            color: Colors.grey[200],
+                            child: const Center(
+                              child: Icon(Icons.image, size: 60, color: Colors.grey),
+                            ),
+                          )),
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  onPressed: _pickImage,
+                  icon: const Icon(Icons.image_outlined),
+                  label: const Text('Pilih Foto Kandidat'),
+                ),
+                const SizedBox(height: 24),
+
+                // Nama
+                TextFormField(
+                  controller: _namaController,
+                  decoration: InputDecoration(
+                    labelText: 'Nama Kandidat',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) =>
+                      value!.isEmpty ? 'Nama tidak boleh kosong' : null,
+                ),
+                const SizedBox(height: 16),
+
+                // Visi
+                TextFormField(
+                  controller: _visiController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: 'Visi',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) =>
+                      value!.isEmpty ? 'Visi tidak boleh kosong' : null,
+                ),
+                const SizedBox(height: 16),
+
+                // Misi
+                TextFormField(
+                  controller: _misiController,
+                  maxLines: 5,
+                  decoration: InputDecoration(
+                    labelText: 'Misi',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) =>
+                      value!.isEmpty ? 'Misi tidak boleh kosong' : null,
+                ),
+                const SizedBox(height: 16),
+
+                // ID Pemilihan
+                TextFormField(
+                  initialValue: _electionId,
+                  decoration: InputDecoration(
+                    labelText: 'ID Pemilihan',
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (val) => _electionId = val,
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'ID Pemilihan wajib diisi' : null,
+                ),
+                const SizedBox(height: 24),
+
+                _isLoading
+                    ? const CircularProgressIndicator()
+                    : SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _submit,
+                          icon: const Icon(Icons.save),
+                          label: const Text('Simpan Kandidat'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            backgroundColor: Colors.deepPurple,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+              ],
+            ),
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 }
+}
+
