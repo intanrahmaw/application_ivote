@@ -1,3 +1,4 @@
+import 'package:application_ivote/screens/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -32,9 +33,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      initialRoute: AppRoutes.splash,
-      getPages: AppRoutes.routes,
-      // home: SplashScreen(), // BARIS INI DIHAPUS
+      // initialRoute: AppRoutes.splash,
+      // getPages: AppRoutes.routes,
+      home: ProfileScreen(), // BARIS INI DIHAPUS
     );
   }
 }
