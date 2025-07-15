@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:application_ivote/models/election_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -28,29 +29,29 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
   Candidate? _existingCandidate;
   XFile? _imageFile;
   String? _existingImageUrl;
-  List<Map<String, dynamic>> _elections = [];
+  List<Elections> _elections = [];
 
   @override
   void initState() {
     super.initState();
-    if (Get.arguments is Candidate) {
-      _existingCandidate = Get.arguments as Candidate;
-      _namaController.text = _existingCandidate!.nama;
-      _visiController.text = _existingCandidate!.visi;
-      _misiController.text = _existingCandidate!.misi;
-      _electionId = _existingCandidate!.electionId;
-      _existingImageUrl = _existingCandidate!.imageUrl;
-    }
-    _loadElections();
+    _existingCandidate = widget.candidate;
+if (_existingCandidate != null) {
+  _namaController.text = _existingCandidate!.nama;
+  _visiController.text = _existingCandidate!.visi;
+  _misiController.text = _existingCandidate!.misi;
+  _electionId = _existingCandidate!.electionId;
+  _existingImageUrl = _existingCandidate!.imageUrl;
+}
+ _loadElections();
   }
 
   Future<void> _loadElections() async {
-    final response = await Supabase.instance.client
-        .from('election')
-        .select('id, nama_pemilihan');
+    final response = await Supabase.instance.client.from('elections').select();
 
     setState(() {
-      _elections = List<Map<String, dynamic>>.from(response);
+      _elections = (response as List)
+          .map((e) => Elections.fromJson(e))
+          .toList();
     });
   }
 
@@ -133,8 +134,7 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text(_existingCandidate == null ? 'Tambah Kandidat' : 'Edit Kandidat'),
+        title: Text(_existingCandidate == null ? 'Tambah Kandidat' : 'Edit Kandidat'),
         centerTitle: true,
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
@@ -143,8 +143,7 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
         padding: const EdgeInsets.all(20.0),
         child: Card(
           elevation: 4,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Form(
@@ -164,19 +163,15 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
                   // Gambar preview
                   _imageFile != null
                       ? (kIsWeb
-                          ? Image.network(_imageFile!.path,
-                              height: 160, fit: BoxFit.cover)
-                          : Image.file(File(_imageFile!.path),
-                              height: 160, fit: BoxFit.cover))
+                          ? Image.network(_imageFile!.path, height: 160, fit: BoxFit.cover)
+                          : Image.file(File(_imageFile!.path), height: 160, fit: BoxFit.cover))
                       : (_existingImageUrl != null
-                          ? Image.network(_existingImageUrl!,
-                              height: 160, fit: BoxFit.cover)
+                          ? Image.network(_existingImageUrl!, height: 160, fit: BoxFit.cover)
                           : Container(
                               height: 160,
                               color: Colors.grey[200],
                               child: const Center(
-                                child:
-                                    Icon(Icons.image, size: 60, color: Colors.grey),
+                                child: Icon(Icons.image, size: 60, color: Colors.grey),
                               ),
                             )),
                   const SizedBox(height: 10),
@@ -226,28 +221,29 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
                   const SizedBox(height: 16),
 
                   // Dropdown Pemilihan
-                  DropdownButtonFormField<String>(
-                    value: _electionId,
-                    items: _elections.map((e) {
-                      return DropdownMenuItem<String>(
-                        value: e['id'],
-                        child: Text(e['nama_pemilihan']),
-                      );
-                    }).toList(),
-                    onChanged: (val) {
-                      setState(() {
-                        _electionId = val;
-                      });
-                    },
-                    validator: (value) =>
-                        value == null || value.isEmpty
-                            ? 'Pilih pemilihan terlebih dahulu'
-                            : null,
-                    decoration: const InputDecoration(
-                      labelText: 'Pilih Pemilihan',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
+                 DropdownButtonFormField<String>(
+  value: _elections.any((e) => e.electionId == _electionId) ? _electionId : null,
+  items: _elections.map((e) {
+    return DropdownMenuItem<String>(
+      value: e.electionId,
+      child: Text(e.judul),
+    );
+  }).toList(),
+  onChanged: (val) {
+    setState(() {
+      _electionId = val;
+    });
+  },
+  validator: (value) =>
+      value == null || value.isEmpty
+          ? 'Pilih pemilihan terlebih dahulu'
+          : null,
+  decoration: const InputDecoration(
+    labelText: 'Pilih Pemilihan',
+    border: OutlineInputBorder(),
+  ),
+),
+
                   const SizedBox(height: 24),
 
                   _isLoading
@@ -259,8 +255,7 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
                             icon: const Icon(Icons.save),
                             label: const Text('Simpan Kandidat'),
                             style: ElevatedButton.styleFrom(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 16),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                               backgroundColor: Colors.deepPurple,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(

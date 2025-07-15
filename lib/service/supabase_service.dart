@@ -29,7 +29,7 @@ class SupabaseService {
     String? imageUrl
   }) async {
     await supabase.from('candidates').insert({
-      'election_id': electionId,
+      'elections_id': electionId,
       'nama': nama,
       'visi': visi,
       'misi': misi,
@@ -47,7 +47,7 @@ class SupabaseService {
     String? imageUrl,
   }) async {
     final updates = {
-      'election_id': electionId,
+      'elections_id': electionId,
       'nama': nama,
       'visi': visi,
       'misi': misi,
