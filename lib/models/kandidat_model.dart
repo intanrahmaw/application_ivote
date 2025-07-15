@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class Candidate {
   final String candidateId;
   final String electionId;
@@ -20,13 +22,13 @@ class Candidate {
   });
 
  factory Candidate.fromMap(Map<String, dynamic> map) {
-  return Candidate(
-    candidateId: map['candidate_id'] ?? '',
-    electionId: map['election_id'] ?? '',
-    nama: map['nama'] ?? '',
+  return Candidate(    
+    candidateId: map['candidate_id']?.toString() ?? '',
+    electionId: map['elections_id']?.toString() ?? '',
+    nama: map['nama'] ?? '',    
     visi: map['visi'] ?? '',
     misi: map['misi'] ?? '',
-    imageUrl: map['image_url'] ?? '',
+    imageUrl: map['image_url'],
     created: map['created_at'] != null
         ? DateTime.parse(map['created_at'])
         : DateTime.now(),
