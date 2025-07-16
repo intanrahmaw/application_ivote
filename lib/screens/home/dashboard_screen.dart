@@ -41,6 +41,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         case 1:
           Get.off(const VoteScreen());
           break;
+        case 2:
+      Get.toNamed('/user/hasil-vote'); // atau panggil widget hasil vote langsung
+      break;
+    case 3:
+      Get.toNamed('/profile'); // atau Get.off(const ProfileScreen());
+      break;
       }
     }
 

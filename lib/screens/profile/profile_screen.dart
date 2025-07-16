@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:application_ivote/screens/auth/login_screen.dart';// Pastikan Anda memiliki file login_screen.dart
-import 'package:application_ivote/screens/profile/edit_profile.dart'; // Impor EditAccountScreen
-// halaman login setelah logout
+import 'package:application_ivote/screens/auth/login_screen.dart';
+import 'package:application_ivote/screens/profile/edit_profile.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -22,10 +22,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUser() async {
-    final user = supabase.auth.currentUser;
+    final user = supabase.auth.currentSession?.user; // ✅ valid di v2.9.0
+    print("🟡 Current User: $user");
+
     if (user == null) {
-      setState(() {
-        username = 'Tidak Dikenal';
+      Future.microtask(() {
+        Get.offAll(() => const LoginScreen());
       });
       return;
     }
@@ -41,6 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         username = data['username'] ?? 'Pengguna';
       });
     } catch (e) {
+      print("❌ Gagal ambil data user: $e");
       setState(() {
         username = 'Gagal Ambil Nama';
       });
@@ -49,32 +52,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _logout() async {
     await supabase.auth.signOut();
-    if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (route) => false,
-      );
-    }
+    Get.offAll(() => const LoginScreen());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 3,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.black54,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Pengaturan'),
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Hasil Vote'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
-        onTap: (index) {
-          // Navigasi sesuai index
-        },
+      appBar: AppBar(
+        title: const Text('Profil Saya'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
       ),
       body: SafeArea(
         child: Padding(
@@ -85,15 +73,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               CircleAvatar(
                 radius: 40,
                 backgroundColor: Colors.grey[200],
-                child: const Icon(Icons.image, size: 40, color: Colors.grey),
+                child: const Icon(Icons.person, size: 40, color: Colors.grey),
               ),
               const SizedBox(height: 15),
-              Text(username, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(
+                username,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 40),
-
               ListTile(
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const EditAccountScreen()));
+                onTap: () async {
+                  await Get.to(() => const EditAccountScreen());
+                  _loadUser(); // refresh username setelah edit
                 },
                 leading: CircleAvatar(
                   backgroundColor: Colors.grey[100],

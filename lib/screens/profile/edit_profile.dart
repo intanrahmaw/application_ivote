@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../auth/login_screen.dart'; // Sesuaikan path jika berbeda
 
 class EditAccountScreen extends StatefulWidget {
   const EditAccountScreen({super.key});
@@ -9,8 +10,7 @@ class EditAccountScreen extends StatefulWidget {
 }
 
 class _EditAccountScreenState extends State<EditAccountScreen> {
-  final _supabase = Supabase.instance.client;
-
+  final supabase = Supabase.instance.client;
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -24,16 +24,18 @@ class _EditAccountScreenState extends State<EditAccountScreen> {
   }
 
   Future<void> _loadUserData() async {
-    final user = _supabase.auth.currentUser;
+    final user = supabase.auth.currentSession?.user;
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User belum login')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User belum login')),
+        );
+      }
       return;
     }
 
     try {
-      final data = await _supabase
+      final data = await supabase
           .from('users')
           .select('username')
           .eq('user_id', user.id)
@@ -44,46 +46,80 @@ class _EditAccountScreenState extends State<EditAccountScreen> {
         _loading = false;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memuat data: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memuat data: $e')),
+        );
+      }
     }
   }
 
   Future<void> _updateAccount() async {
-    final user = _supabase.auth.currentUser;
+    final user = supabase.auth.currentSession?.user;
     if (user == null) return;
 
     final newPassword = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
     if (newPassword.isNotEmpty && newPassword != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password dan konfirmasi tidak cocok')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Password dan konfirmasi tidak cocok')),
+        );
+      }
       return;
     }
 
     try {
-      // Update username di tabel users
-      await _supabase.from('users').update({
+      // Update username
+      await supabase.from('users').update({
         'username': _usernameController.text.trim(),
         'updated_at': DateTime.now().toIso8601String(),
       }).eq('user_id', user.id);
 
-      // Jika password diisi dan cocok, update password via auth
+      // Jika password diubah, update dan login ulang
       if (newPassword.isNotEmpty) {
-        await _supabase.auth.updateUser(UserAttributes(password: newPassword));
+        final email = user.email;
+        if (email != null) {
+          // Update password
+          await supabase.auth.updateUser(
+            UserAttributes(password: newPassword),
+          );
+
+          // Login ulang agar session valid
+          final loginRes = await supabase.auth.signInWithPassword(
+            email: email,
+            password: newPassword,
+          );
+
+          if (loginRes.session == null) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Re-login gagal, silakan login ulang')),
+              );
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
+              return;
+            }
+          }
+        }
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Akun berhasil diperbarui')),
-      );
-      Navigator.pop(context);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Akun berhasil diperbarui')),
+        );
+        Navigator.pop(context);
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memperbarui akun: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memperbarui akun: $e')),
+        );
+      }
     }
   }
 
@@ -133,7 +169,8 @@ class _EditAccountScreenState extends State<EditAccountScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hintText, {bool obscureText = false}) {
+  Widget _buildTextField(TextEditingController controller, String hintText,
+      {bool obscureText = false}) {
     return TextField(
       controller: controller,
       obscureText: obscureText,

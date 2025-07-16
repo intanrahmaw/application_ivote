@@ -14,7 +14,7 @@ void main() async {
   await GetStorage.init();
 
   // Inisialisasi Supabase
-  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
+  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey,);
 
   runApp(const MyApp());
 }
@@ -33,9 +33,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      // initialRoute: AppRoutes.splash,
-      // getPages: AppRoutes.routes,
-      home: ProfileScreen(), // BARIS INI DIHAPUS
+       initialRoute: AppRoutes.splash,
+       getPages: AppRoutes.routes,
+       // BARIS INI DIHAPUS
     );
   }
 }
