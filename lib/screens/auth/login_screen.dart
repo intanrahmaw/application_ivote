@@ -55,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Jika bukan admin, coba cek tabel users
       final userResponse = await supabase
           .from('users')
-          .select('nama')
+          .select('user_id,nama')
           .eq('username', username)
           .eq('password', password)
           .maybeSingle();
@@ -69,6 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final namaUser = userResponse['nama'] ?? 'Pengguna';
       loggedInUserName = namaUser;
       loggedInUserRole = 'user';
+      loggedInUserId = userResponse['user_id'];
 
       Get.snackbar('Berhasil Login', 'Selamat datang, $namaUser!',
           backgroundColor: Colors.green, colorText: Colors.white);
