@@ -34,11 +34,21 @@ class _ElectionManagementScreenState extends State<ElectionManagementScreen> {
     setState(() => _isLoading = true);
     try {
       final data = await _supabaseService.getElections();
+      List<Elections> elections = data.map((e) => Elections.fromJson(e)).toList();
+
+      DateTime now = DateTime.now();
+      for (var election in elections) {
+        if (election.isActive && election.endTime.isBefore(now)) {
+          await _supabaseService.updateElectionStatus(election.electionId, false);
+        }
+      }
+
+      final updatedData = await _supabaseService.getElections();
       setState(() {
-        _electionList = data.map((e) => Elections.fromJson(e)).toList();
+        _electionList = updatedData.map((e) => Elections.fromJson(e)).toList();
       });
     } catch (e) {
-      Get.snackbar('Gagal', 'Gagal memuat election: \$e',
+      Get.snackbar('Gagal', 'Gagal memuat election: $e',
           backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
       setState(() => _isLoading = false);
@@ -52,7 +62,7 @@ class _ElectionManagementScreenState extends State<ElectionManagementScreen> {
           backgroundColor: Colors.green, colorText: Colors.white);
       _fetchelections();
     } catch (e) {
-      Get.snackbar('Error', 'Gagal menghapus election: \$e',
+      Get.snackbar('Error', 'Gagal menghapus election: $e',
           backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
@@ -129,7 +139,7 @@ class _ElectionManagementScreenState extends State<ElectionManagementScreen> {
           Get.offAllNamed('/dashboard');
           break;
         case 1:
-          DashboardAdminMenu.show(context); // tidak perlu return
+          DashboardAdminMenu.show(context);
           break;
         case 2:
           Get.offNamed('/admin/hasil-vote');
@@ -164,7 +174,19 @@ class _ElectionManagementScreenState extends State<ElectionManagementScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: ElevatedButton(
-              onPressed: () => _navigateAndRefresh(),
+              onPressed: () {
+                bool hasActiveElection = _electionList.any((e) => e.isActive);
+                if (hasActiveElection) {
+                  Get.snackbar(
+                    'Tidak Bisa Menambah',
+                    'Masih ada election yang sedang berlangsung.',
+                    backgroundColor: Colors.orange,
+                    colorText: Colors.white,
+                  );
+                } else {
+                  _navigateAndRefresh();
+                }
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
                 foregroundColor: Colors.white,

@@ -5,6 +5,7 @@ import 'package:application_ivote/widgets/custom_bottom_nav_bar_admin.dart';
 import 'package:application_ivote/utils/global_user.dart';
 import 'package:application_ivote/screens/vote/vote_screen.dart';
 import 'package:application_ivote/widgets/sub_menu_admin.dart';
+import 'detail_candidate_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:async';
 
@@ -32,25 +33,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _fetchKandidat() async {
-    final response = await supabase.from('kandidat').select();
-    setState(() {
-      kandidatList = List<Map<String, dynamic>>.from(response);
-    });
+    try {
+      final response = await supabase.from('candidates').select();
+      print('Kandidat response: $response');
+      setState(() {
+        kandidatList = List<Map<String, dynamic>>.from(response);
+      });
+    } catch (e) {
+      print('Gagal memuat kandidat: $e');
+    }
   }
 
   void _fetchElectionEndTime() async {
-    final response = await supabase
-        .from('elections')
-        .select('end_time')
-        .order('end_time', ascending: false)
-        .limit(1)
-        .single();
+    try {
+      final response = await supabase
+          .from('elections')
+          .select('end_time')
+          .order('end_time', ascending: false)
+          .limit(1)
+          .single();
 
-    if (response['end_time'] != null) {
-      setState(() {
-        endTime = DateTime.parse(response['end_time']);
-        _startCountdown();
-      });
+      if (response['end_time'] != null) {
+        setState(() {
+          endTime = DateTime.parse(response['end_time']);
+          _startCountdown();
+        });
+      }
+    } catch (e) {
+      print('Gagal memuat waktu akhir pemilu: $e');
     }
   }
 
@@ -141,12 +151,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 16.0),
             _buildSearchBar(),
             const SizedBox(height: 16.0),
-            ...kandidatList.map((k) => Column(
-              children: [
-                _buildKandidatCard(k['nama_kandidat'], k['label_kandidat']),
-                const SizedBox(height: 16.0),
-              ],
-            )),
+            if (kandidatList.isEmpty)
+              const Center(child: Text('Belum ada kandidat tersedia'))
+            else
+              ...kandidatList.map((k) => Column(
+                children: [
+                  _buildKandidatCard(k),
+                  const SizedBox(height: 16.0),
+                ],
+              )),
           ],
         ),
       ),
@@ -220,7 +233,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildKandidatCard(String name, String role) {
+  Widget _buildKandidatCard(Map<String, dynamic> kandidat) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -232,19 +245,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       child: Row(
         children: [
-          const CircleAvatar(backgroundColor: Colors.grey, child: Icon(Icons.person, color: Colors.white)),
+          CircleAvatar(
+            backgroundImage: kandidat['image_url'] != null && kandidat['image_url'] != ""
+                ? NetworkImage(kandidat['image_url'])
+                : null,
+            backgroundColor: Colors.grey[300],
+            radius: 24,
+            child: kandidat['image_url'] == null || kandidat['image_url'] == ""
+                ? const Icon(Icons.person, color: Colors.white)
+                : null,
+          ),
           const SizedBox(width: 16.0),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                Text(role, style: const TextStyle(color: Colors.grey)),
+                Text(kandidat['nama'] ?? '-', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(kandidat['visi'] ?? '-', style: const TextStyle(color: Colors.grey)),
               ],
             ),
           ),
           OutlinedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DetailCandidateScreen(candidate: kandidat),
+                ),
+              );
+            },
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Colors.deepPurple),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
