@@ -1,15 +1,16 @@
-class Profile {
+class Users {
   final String userId;
   final String username;
-  final String password; // ⚠️ Sebaiknya dihindari jika di frontend
+  final String password; 
   final String nama;
   final String email;
   final String alamat;
   final String noHp;
+  final String? avatarUrl;
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  Profile({
+  Users({
     required this.userId,
     required this.username,
     required this.password,
@@ -17,12 +18,13 @@ class Profile {
     required this.email,
     required this.alamat,
     required this.noHp,
+    required this.avatarUrl,
     required this.createdAt,
     required this.updatedAt,
   });
 
-  factory Profile.fromJson(Map<String, dynamic> json) {
-    return Profile(
+  factory Users.fromJson(Map<String, dynamic> json) {
+    return Users(
       userId: json['user_id'],
       username: json['username'],
       password: json['password'],
@@ -30,6 +32,7 @@ class Profile {
       email: json['email'],
       alamat: json['alamat'] ?? '',
       noHp: json['no_hp'] ?? '',
+      avatarUrl: json['avatar_url'] ?? '',
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
     );
@@ -44,6 +47,7 @@ class Profile {
       'email': email,
       'alamat': alamat,
       'no_hp': noHp,
+      'avatar_url': avatarUrl,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
