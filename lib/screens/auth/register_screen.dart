@@ -259,7 +259,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             alignment: Alignment.center,
             child: const Text(
               '+62',
-              style: TextStyle(color: Colors.black87),
+              style: TextStyle(color: Colors.grey),
             ),
           ),
           const SizedBox(width: 10),
@@ -277,7 +277,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 return null;
               },
               decoration: InputDecoration(
-                hintText: 'Nomor HP',
+                hintText: '',
                 filled: true,
                 fillColor: const Color(0xFFF0F0F0),
                 contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),

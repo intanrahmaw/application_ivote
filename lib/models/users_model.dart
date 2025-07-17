@@ -1,4 +1,4 @@
-class Profile {
+class Users {
   final String userId;
   final String username;
   final String password; 
@@ -10,7 +10,7 @@ class Profile {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  Profile({
+  Users({
     required this.userId,
     required this.username,
     required this.password,
@@ -23,8 +23,8 @@ class Profile {
     required this.updatedAt,
   });
 
-  factory Profile.fromJson(Map<String, dynamic> json) {
-    return Profile(
+  factory Users.fromJson(Map<String, dynamic> json) {
+    return Users(
       userId: json['user_id'],
       username: json['username'],
       password: json['password'],

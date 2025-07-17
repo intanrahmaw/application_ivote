@@ -4,6 +4,9 @@ import 'package:application_ivote/widgets/custom_bottom_nav_bar_user.dart';
 import 'package:application_ivote/widgets/custom_bottom_nav_bar_admin.dart';
 import 'package:application_ivote/utils/global_user.dart';
 import 'package:application_ivote/screens/vote/vote_screen.dart';
+import 'package:application_ivote/widgets/sub_menu_admin.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:async';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -14,6 +17,60 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
+  List<Map<String, dynamic>> kandidatList = [];
+  DateTime? endTime;
+  Timer? countdownTimer;
+  Duration remainingTime = Duration.zero;
+
+  final supabase = Supabase.instance.client;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchKandidat();
+    _fetchElectionEndTime();
+  }
+
+  void _fetchKandidat() async {
+    final response = await supabase.from('kandidat').select();
+    setState(() {
+      kandidatList = List<Map<String, dynamic>>.from(response);
+    });
+  }
+
+  void _fetchElectionEndTime() async {
+    final response = await supabase
+        .from('elections')
+        .select('end_time')
+        .order('end_time', ascending: false)
+        .limit(1)
+        .single();
+
+    if (response['end_time'] != null) {
+      setState(() {
+        endTime = DateTime.parse(response['end_time']);
+        _startCountdown();
+      });
+    }
+  }
+
+  void _startCountdown() {
+    countdownTimer?.cancel();
+    countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      final now = DateTime.now();
+      setState(() {
+        remainingTime = endTime!.difference(now).isNegative
+            ? Duration.zero
+            : endTime!.difference(now);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    countdownTimer?.cancel();
+    super.dispose();
+  }
 
   void _onItemTapped(int index) {
     if (index == _selectedIndex) return;
@@ -21,10 +78,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (loggedInUserRole == 'admin') {
       switch (index) {
         case 0:
-          // Tetap di Dashboard
           break;
         case 1:
-          _showSettingsMenu();
+          DashboardAdminMenu.show(context);
           return;
         case 2:
           Get.toNamed('/admin/hasil-vote');
@@ -36,7 +92,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } else {
       switch (index) {
         case 0:
-          // Tetap di Dashboard
           break;
         case 1:
           Get.off(const VoteScreen());
@@ -49,51 +104,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-  void _showSettingsMenu() {
-    showModalBottomSheet(
-      context: context,
-      isDismissible: true,
-      enableDrag: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) {
-        return ListView(
-          shrinkWrap: true,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('User Management'),
-              onTap: () {
-                Navigator.pop(context);
-                Get.toNamed('/admin/users');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.group),
-              title: const Text('Kandidat'),
-              onTap: () {
-                Navigator.pop(context);
-                Get.toNamed('/admin/kandidat');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.how_to_vote),
-              title: const Text('Election'),
-              onTap: () {
-                Navigator.pop(context);
-                Get.toNamed('/admin/election');
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Handle loading jika belum login
     if (loggedInUserRole.isEmpty) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -111,17 +123,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         title: Text(
           ' ${loggedInUserName.isNotEmpty ? loggedInUserName.capitalizeFirst! : 'Pengguna'}',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4.0),
-          child: Container(
-            color: Colors.grey[200],
-            height: 1.0,
-          ),
+          child: Container(color: Colors.grey[200], height: 1.0),
         ),
       ),
       body: SingleChildScrollView(
@@ -131,32 +137,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             _buildTimerCard(),
             const SizedBox(height: 24.0),
-            const Text(
-              'Kandidat',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            const Text('Kandidat', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16.0),
             _buildSearchBar(),
             const SizedBox(height: 16.0),
-            _buildKandidatCard('Intan Rahma', 'Kandidat 1'),
-            const SizedBox(height: 16.0),
-            _buildKandidatCard('Fadenta', 'Kandidat 2'),
+            ...kandidatList.map((k) => Column(
+              children: [
+                _buildKandidatCard(k['nama_kandidat'], k['label_kandidat']),
+                const SizedBox(height: 16.0),
+              ],
+            )),
           ],
         ),
       ),
       bottomNavigationBar: loggedInUserRole == 'admin'
-          ? CustomBottomNavBarAdmin(
-              selectedIndex: _selectedIndex,
-              onItemTapped: _onItemTapped,
-            )
-          : CustomBottomNavBarUser(
-              selectedIndex: _selectedIndex,
-              onItemTapped: _onItemTapped,
-            ),
+          ? CustomBottomNavBarAdmin(selectedIndex: _selectedIndex, onItemTapped: _onItemTapped)
+          : CustomBottomNavBarUser(selectedIndex: _selectedIndex, onItemTapped: _onItemTapped),
     );
   }
 
   Widget _buildTimerCard() {
+    int days = remainingTime.inDays;
+    int hours = remainingTime.inHours % 24;
+    int minutes = remainingTime.inMinutes % 60;
+    int seconds = remainingTime.inSeconds % 60;
+
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -170,20 +175,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: const [
               Icon(Icons.hourglass_empty, color: Colors.white),
               SizedBox(width: 8.0),
-              Text(
-                'Waktu tersisa untuk pemilu',
-                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+              Text('Waktu tersisa untuk pemilu',
+                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
             ],
           ),
           const SizedBox(height: 16.0),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildTimeItem('100', 'Hari'),
-              _buildTimeItem('5', 'Jam'),
-              _buildTimeItem('19', 'Menit'),
-              _buildTimeItem('47', 'Detik'),
+              _buildTimeItem('$days', 'Hari'),
+              _buildTimeItem('$hours', 'Jam'),
+              _buildTimeItem('$minutes', 'Menit'),
+              _buildTimeItem('$seconds', 'Detik'),
             ],
           ),
         ],
@@ -194,18 +197,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildSearchBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(10.0),
-      ),
+      decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(10.0)),
       child: Row(
         children: const [
           Expanded(
             child: TextField(
-              decoration: InputDecoration(
-                hintText: 'cari kandidat...',
-                border: InputBorder.none,
-              ),
+              decoration: InputDecoration(hintText: 'cari kandidat...', border: InputBorder.none),
             ),
           ),
           Icon(Icons.search, color: Colors.grey),
@@ -217,18 +214,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildTimeItem(String value, String label) {
     return Column(
       children: [
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white, fontSize: 14),
-        ),
+        Text(value, style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+        Text(label, style: const TextStyle(color: Colors.white, fontSize: 14)),
       ],
     );
   }
@@ -240,20 +227,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(10.0),
         boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
+          BoxShadow(color: Colors.grey.withOpacity(0.2), spreadRadius: 1, blurRadius: 5, offset: const Offset(0, 3)),
         ],
       ),
       child: Row(
         children: [
-          const CircleAvatar(
-            backgroundColor: Colors.grey,
-            child: Icon(Icons.person, color: Colors.white),
-          ),
+          const CircleAvatar(backgroundColor: Colors.grey, child: Icon(Icons.person, color: Colors.white)),
           const SizedBox(width: 16.0),
           Expanded(
             child: Column(
@@ -270,10 +249,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               side: const BorderSide(color: Colors.deepPurple),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
             ),
-            child: const Text(
-              'lihat profile',
-              style: TextStyle(color: Colors.deepPurple),
-            ),
+            child: const Text('lihat profile', style: TextStyle(color: Colors.deepPurple)),
           ),
         ],
       ),

@@ -8,6 +8,8 @@ import '../../screens/welcome/welcome1_screen.dart';
 import '../../screens/welcome/welcome2_screen.dart';
 import '../../screens/welcome/welcome3_screen.dart';
 import '../../screens/splash_screen.dart';
+import '../../screens/settings/users/user_management_screen.dart';
+import '../../screens/settings/elections/election_management_screen.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -17,6 +19,8 @@ class AppRoutes {
   static const String login = '/login';
   static const String register = '/register';
   static const String dashboard = '/dashboard';
+  static const String user = '/user';
+  static const String election = '/election';
 
   static final routes = [
     GetPage(name: splash, page: () => const SplashScreen()),
@@ -26,5 +30,7 @@ class AppRoutes {
     GetPage(name: login, page: () => const LoginScreen()),
     GetPage(name: register, page: () => const RegisterScreen()),
     GetPage(name: dashboard, page: () => const DashboardScreen()),
+    GetPage(name: user, page: () => const UserManagementScreen()),
+    GetPage(name: election, page: () => const ElectionManagementScreen()),
   ];
 }

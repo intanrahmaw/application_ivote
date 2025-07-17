@@ -112,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Image.asset('assets/Image/logo.png', height: screenHeight * 0.3),
                       SizedBox(height: screenHeight * 0.02),
                       const Text(
-                        'WELCOME TO iVOTE',
+                        'WELCOME TO IVOTE',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
