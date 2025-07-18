@@ -65,7 +65,6 @@ class _VoteScreenState extends State<VoteScreen> {
  void _handleVote(Map<String, dynamic> candidate) {
   final candidateId = candidate['candidate_id'];
   final electionId = candidate['elections_id'];
-
   voteForCandidate(candidateId, electionId);
 }
 

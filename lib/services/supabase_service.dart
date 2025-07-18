@@ -1,4 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:io';
+import 'package:path/path.dart' as path;
 
 // Inisialisasi Supabase client
 final supabase = Supabase.instance.client;
@@ -54,6 +56,30 @@ class SupabaseService {
       'no_hp': noHp,
     };
 
+// Upload avatar ke bucket sesuai role
+  Future<String?> uploadAvatar(String userId, File imageFile, String role) async {
+    try {
+      final extension = path.extension(imageFile.path); // .jpg/.png
+      final fileName = 'profile_${userId}_${DateTime.now().millisecondsSinceEpoch}$extension';
+      final bucketName = role == 'admin' ? 'admin' : 'user';
+      final imageBytes = await imageFile.readAsBytes();
+      final filePath = 'profile_images/$fileName';
+
+      await supabase.storage
+          .from(bucketName)
+          .uploadBinary(filePath, imageBytes, fileOptions: FileOptions(
+            upsert: true,
+            contentType: 'image/${extension.replaceAll('.', '')}',
+          ));
+
+      final publicUrl = supabase.storage.from(bucketName).getPublicUrl(filePath);
+      return publicUrl;
+    } catch (e) {
+      print('Upload gagal: $e');
+      return null;
+    }
+  }
+
     // Jika password diisi, tambahkan ke data update
     if (password != null && password.isNotEmpty) {
       updateData['password'] = password; // ⚠️ Tetap sebaiknya di-hash
@@ -61,8 +87,7 @@ class SupabaseService {
 
     await supabase.from('users').update(updateData).eq('user_id', userId);
   }
-
-
+ 
   // ==========================
 // VOTING SERVICE
 // ==========================

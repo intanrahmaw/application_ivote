@@ -5,6 +5,7 @@ import 'package:application_ivote/widgets/custom_bottom_nav_bar_admin.dart';
 import 'package:application_ivote/utils/global_user.dart';
 import 'package:application_ivote/screens/vote/vote_screen.dart';
 import 'package:application_ivote/screens/vote/result_screen.dart';
+import 'package:application_ivote/screens/profile/profile_screen.dart';
 import 'package:application_ivote/widgets/sub_menu_admin.dart';
 import 'detail_candidate_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -97,7 +98,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Get.toNamed('/admin/hasil-vote');
           return;
         case 3:
-          Get.toNamed('/admin/profil');
+          Get.off(() => const ProfileScreen());
           return;
       }
     } else {
@@ -110,6 +111,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         case 2:
           Get.off(const VoteResultScreen());
           break;
+        case 3:
+          Get.off(const ProfileScreen());
+          return;
       }
     }
 

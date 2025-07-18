@@ -1,5 +1,6 @@
 // lib/utils/app_routes.dart
 
+import 'package:application_ivote/screens/profile/profile_screen.dart';
 import 'package:application_ivote/screens/vote/result_screen.dart';
 import 'package:get/get.dart';
 import '../../screens/auth/login_screen.dart';
@@ -27,6 +28,7 @@ class AppRoutes {
   static const String result = '/result';
   static const String voteSuccess = '/vote-success';
   static const String vote = '/vote';
+  static const String profile = '/profile';
 
   static final routes = [
     GetPage(name: splash, page: () => const SplashScreen()),
@@ -40,5 +42,6 @@ class AppRoutes {
     GetPage(name: election, page: () => const ElectionManagementScreen()),
     GetPage(name: candidate, page: () => const CandidatListScreen()),
     GetPage(name: result, page: () => const VoteResultScreen()),
+    GetPage(name: profile, page: () => const ProfileScreen()),
   ];
 }
