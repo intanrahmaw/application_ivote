@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; 
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:application_ivote/utils/app_routes.dart';
 import '../../utils/constants.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Inisialisasi GetStorage
   await GetStorage.init();
@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: AppRoutes.splash,
       getPages: AppRoutes.routes,
-      // home: SplashScreen(), // BARIS INI DIHAPUS
+      // home: SplashScreen(),
     );
   }
 }
