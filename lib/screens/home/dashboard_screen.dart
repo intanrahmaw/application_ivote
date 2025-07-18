@@ -4,6 +4,7 @@ import 'package:application_ivote/widgets/custom_bottom_nav_bar_user.dart';
 import 'package:application_ivote/widgets/custom_bottom_nav_bar_admin.dart';
 import 'package:application_ivote/utils/global_user.dart';
 import 'package:application_ivote/screens/vote/vote_screen.dart';
+import 'package:application_ivote/screens/vote/result_screen.dart';
 import 'package:application_ivote/widgets/sub_menu_admin.dart';
 import 'detail_candidate_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -105,6 +106,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           break;
         case 1:
           Get.off(const VoteScreen());
+          break;
+        case 2:
+          Get.off(const VoteResultScreen());
           break;
       }
     }

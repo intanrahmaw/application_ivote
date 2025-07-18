@@ -1,3 +1,5 @@
+import 'package:application_ivote/screens/vote/vote_succes.dart';
+import 'package:application_ivote/screens/vote/result_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -33,41 +35,40 @@ class _VoteScreenState extends State<VoteScreen> {
     });
   }
 
-  Future<void> voteForCandidate(String candidateId) async {
-    print('voteForCandidate dipanggil');
-    print('User ID: $loggedInUserId');
-    print('Candidate ID: $candidateId');
+ Future<void> voteForCandidate(String candidateId, String electionId) async {
+  try {
+    // final existing = await supabase
+    //     .from('votes')
+    //     .select()
+    //     .eq('user_id', loggedInUserId)
+    //     .maybeSingle();
 
-    if (loggedInUserId.isEmpty) {
-      Get.snackbar('Error', 'Anda belum login');
-      return;
-    }
+    // if (existing != null) {
+    //   Get.snackbar('Gagal', 'Anda sudah melakukan vote.');
+    //   return;
+    // }
 
-    final existing = await supabase
-        .from('votes')
-        .select()
-        .eq('user_id', loggedInUserId)
-        .maybeSingle();
-
-    if (existing != null) {
-      Get.snackbar('Gagal', 'Anda sudah melakukan vote.');
-      return;
-    }
-
-    await supabase.from('votes').insert({
+    final response = await supabase.from('votes').insert({
       'user_id': loggedInUserId,
       'candidate_id': candidateId,
+      'elections_id': electionId, // ✅ Tambahkan ini
     });
 
-    Get.snackbar('Sukses', 'Vote berhasil dikirim!');
-    await Future.delayed(const Duration(seconds: 1));
-    Get.offAll(() => const DashboardScreen());
-  }
+    Get.offAll(() => const VoteSuccessScreen());
 
-  void _handleVote(String candidateId) {
-    print("Vote button diklik untuk ID kandidat: $candidateId");
-    voteForCandidate(candidateId);
+  } catch (e, st) {
+    print('ERROR saat vote: $e');
+    Get.snackbar('Error', 'Gagal vote: $e');
   }
+}
+
+ void _handleVote(Map<String, dynamic> candidate) {
+  final candidateId = candidate['candidate_id'];
+  final electionId = candidate['elections_id'];
+
+  voteForCandidate(candidateId, electionId);
+}
+
 
   void _onItemTapped(int index) {
     if (index == _currentIndex) return;
@@ -81,6 +82,9 @@ class _VoteScreenState extends State<VoteScreen> {
         Get.offAll(() => const DashboardScreen());
         break;
       case 1:
+        break;
+      case 2:
+        Get.offAll(() => const VoteResultScreen());
         break;
     }
   }
@@ -146,7 +150,7 @@ class _VoteScreenState extends State<VoteScreen> {
                       ),
                       ElevatedButton(
                         key: Key('vote_button_$candidateId'),
-                        onPressed: () => _handleVote(candidateId),
+                        onPressed: () => _handleVote(candidate),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFD1B5F9),
                           shape: RoundedRectangleBorder(
