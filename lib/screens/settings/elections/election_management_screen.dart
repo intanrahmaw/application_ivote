@@ -6,9 +6,10 @@ import 'package:application_ivote/models/elections_model.dart';
 import 'package:application_ivote/screens/settings/elections/election_form_screen.dart';
 import 'package:application_ivote/screens/settings/elections/election_list_table.dart';
 import 'package:application_ivote/services/election_supabase_service.dart';
-import 'package:application_ivote/widgets/custom_bottom_nav_bar_admin.dart';
+import 'package:application_ivote/widgets/custom_bottom_nav_bar.dart';
 import 'package:application_ivote/widgets/sub_menu_admin.dart';
 import 'package:application_ivote/utils/global_user.dart';
+import 'package:application_ivote/screens/profile/profile_screen.dart';
 
 class ElectionManagementScreen extends StatefulWidget {
   const ElectionManagementScreen({super.key});
@@ -137,23 +138,32 @@ class _ElectionManagementScreenState extends State<ElectionManagementScreen> {
       switch (index) {
         case 0:
           Get.offAllNamed('/dashboard');
-          break;
+          return;
         case 1:
-          DashboardAdminMenu.show(context);
-          break;
+          DashboardAdminMenu.show(context); // submenu setting
+          return;
         case 2:
-          Get.offNamed('/admin/hasil-vote');
-          break;
+          Get.offAllNamed('/result');
+          return;
         case 3:
-          Get.offNamed('/admin/profil');
-          break;
+          Get.offAllNamed('/profile');
+          return;
       }
-    }
-
-    if (_selectedIndex != index) {
-      setState(() {
-        _selectedIndex = index;
-      });
+    } else {
+      switch (index) {
+        case 0:
+          Get.offAllNamed('/dashboard');
+          return;
+        case 1:
+          Get.offAllNamed('/vote');
+          return;
+        case 2:
+          Get.offAllNamed('/result');
+          return;
+        case 3:
+          Get.offAllNamed('/profile');
+          return;
+      }
     }
   }
 
@@ -232,7 +242,7 @@ class _ElectionManagementScreenState extends State<ElectionManagementScreen> {
                       ),
               ),
             ),
-      bottomNavigationBar: CustomBottomNavBarAdmin(
+      bottomNavigationBar: CustomBottomNavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
       ),

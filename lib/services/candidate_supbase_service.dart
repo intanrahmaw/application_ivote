@@ -11,7 +11,14 @@ class SupabaseService {
 
   // Ambil semua kandidat
   Future<List<Map<String, dynamic>>> getCandidates() async {
-    final response = await supabase.from('candidates').select();
+    final now = DateTime.now().toIso8601String();
+
+    final response = await supabase
+        .from('candidates')
+        .select('*, elections!inner(*)') // join hanya kalau cocok
+        .eq('elections.is_active', true)
+        .gte('elections.end_time', now); // hanya election yang belum selesai
+
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -24,6 +31,8 @@ class SupabaseService {
   Future<void> addCandidate({
     required String electionId,
     required String nama,
+    required String organisasi,
+    required String label,
     required String visi,
     required String misi,
     String? imageUrl
@@ -31,6 +40,8 @@ class SupabaseService {
     await supabase.from('candidates').insert({
       'elections_id': electionId,
       'nama': nama,
+      'organisasi': organisasi,
+      'label': label,
       'visi': visi,
       'misi': misi,
       'image_url': imageUrl,
@@ -42,6 +53,8 @@ class SupabaseService {
     required String candidateId,
     required String electionId,
     required String nama,
+    required String organisasi,
+    required String label,
     required String visi,
     required String misi,
     String? imageUrl,
@@ -49,6 +62,8 @@ class SupabaseService {
     final updates = {
       'elections_id': electionId,
       'nama': nama,
+      'organisasi': organisasi,
+      'label': label,
       'visi': visi,
       'misi': misi,
       'image_url': imageUrl,

@@ -1,0 +1,50 @@
+// lib/services/supabase_admin_service.dart
+
+import 'dart:io';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/admin_model.dart'; // pastikan path sesuai dengan file kamu
+
+final supabase = Supabase.instance.client;
+
+/// ==========================
+/// ADMIN SERVICE
+/// ==========================
+
+/// Ambil data admin berdasarkan username
+Future<Admin?> getAdminByUsername(String username) async {
+  final response = await supabase
+      .from('admins') // pastikan nama tabel sudah benar di Supabase
+      .select()
+      .eq('username', username)
+      .maybeSingle();
+
+  if (response == null) return null;
+  return Admin.fromJson(response);
+}
+
+/// Update data admin berdasarkan admin_id
+Future<void> updateAdmin({
+  required String adminId,
+  required String username,
+  required String password,
+  required String nama,
+  String? avatarUrl,
+}) async {
+  final updates = {
+    'username': username,
+    'password': password,
+    'nama': nama,
+    'avatar_url': avatarUrl,
+    'updated_at': DateTime.now().toIso8601String(),
+  };
+
+  final response = await supabase
+      .from('admins')
+      .update(updates)
+      .eq('admin_id', adminId)
+      .select();
+
+  if (response.isEmpty) {
+    throw Exception('Gagal update: admin tidak ditemukan.');
+  }
+}

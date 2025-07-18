@@ -62,3 +62,33 @@ class SupabaseService {
     await supabase.from('users').update(updateData).eq('user_id', userId);
   }
 }
+
+// ==========================
+// VOTING SERVICE
+// ==========================
+
+// Tambahkan vote
+Future<void> addVote({
+  required String userId,
+  required String candidateId,
+}) async {
+  // Cek apakah user sudah pernah vote
+  final existingVote = await supabase
+      .from('votes')
+      .select()
+      .eq('user_id', userId)
+      .maybeSingle(); // Ambil satu data, atau null jika belum ada
+
+  if (existingVote != null) {
+    throw Exception("Anda sudah melakukan vote.");
+  }
+
+  await supabase.from('votes').insert({
+    'user_id': userId,
+    'candidate_id': candidateId,
+  });
+}
+
+// Ambil total suara per kand
+
+

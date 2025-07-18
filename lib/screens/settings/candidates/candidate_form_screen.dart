@@ -20,6 +20,8 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final SupabaseService _supabaseService = SupabaseService();
 
+  final _organisasiController = TextEditingController();
+  final _labelController = TextEditingController();
   final _namaController = TextEditingController();
   final _visiController = TextEditingController();
   final _misiController = TextEditingController();
@@ -39,6 +41,8 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
       _namaController.text = _existingCandidate!.nama;
       _visiController.text = _existingCandidate!.visi;
       _misiController.text = _existingCandidate!.misi;
+      _organisasiController.text = _existingCandidate!.organisasi;
+      _labelController.text = _existingCandidate!.label;
       _electionId = _existingCandidate!.electionId;
       _existingImageUrl = _existingCandidate!.imageUrl;
     }
@@ -46,10 +50,19 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
   }
 
   Future<void> _loadElections() async {
-    final response = await Supabase.instance.client.from('elections').select();
+    final response = await Supabase.instance.client
+        .from('elections')
+        .select();
+
+    final now = DateTime.now();
 
     setState(() {
-      _elections = (response as List).map((e) => Elections.fromJson(e)).toList();
+      _elections = (response as List)
+          .map((e) => Elections.fromJson(e))
+          .where((election) =>
+              election.isActive == true &&
+              election.endTime.isAfter(now))
+          .toList();
     });
   }
 
@@ -95,6 +108,8 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
             candidateId: _existingCandidate!.candidateId,
             electionId: _electionId!,
             nama: _namaController.text,
+            organisasi: _organisasiController.text,
+            label: _labelController.text,
             visi: _visiController.text,
             misi: _misiController.text,
             imageUrl: imageUrl,
@@ -103,6 +118,8 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
           await _supabaseService.addCandidate(
             electionId: _electionId!,
             nama: _namaController.text,
+            organisasi: _organisasiController.text,
+            label: _labelController.text,
             visi: _visiController.text,
             misi: _misiController.text,
             imageUrl: imageUrl,
@@ -122,6 +139,8 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
   @override
   void dispose() {
     _namaController.dispose();
+    _organisasiController.dispose();
+    _labelController.dispose();
     _visiController.dispose();
     _misiController.dispose();
     super.dispose();
@@ -219,6 +238,8 @@ class _CandidateFormScreenState extends State<CandidateFormScreen> {
                 const SizedBox(height: 24),
 
                 _buildInputField('Nama Kandidat', _namaController),
+                _buildInputField('Organisasi', _organisasiController),
+                _buildInputField('Label', _labelController),
                 _buildInputField('Visi', _visiController, maxLines: 3),
                 _buildInputField('Misi', _misiController, maxLines: 5),
 

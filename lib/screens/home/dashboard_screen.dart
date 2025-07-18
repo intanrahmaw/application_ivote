@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:application_ivote/widgets/custom_bottom_nav_bar_user.dart';
-import 'package:application_ivote/widgets/custom_bottom_nav_bar_admin.dart';
+import 'package:application_ivote/widgets/custom_bottom_nav_bar.dart';
 import 'package:application_ivote/utils/global_user.dart';
 import 'package:application_ivote/screens/vote/vote_screen.dart';
 import 'package:application_ivote/widgets/sub_menu_admin.dart';
 import 'detail_candidate_screen.dart';
+import 'package:application_ivote/screens/profile/edit_account_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:async';
 
@@ -34,13 +34,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _fetchKandidat() async {
     try {
-      final response = await supabase.from('candidates').select();
-      print('Kandidat response: $response');
+      final response = await supabase
+          .from('candidates')
+          .select('*, elections!inner(is_active)')
+          .eq('elections.is_active', true);
+
+      print('Kandidat aktif response: $response');
+
       setState(() {
         kandidatList = List<Map<String, dynamic>>.from(response);
       });
     } catch (e) {
-      print('Gagal memuat kandidat: $e');
+      print('Gagal memuat kandidat aktif: $e');
     }
   }
 
@@ -83,35 +88,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _onItemTapped(int index) {
-    if (index == _selectedIndex) return;
-
     if (loggedInUserRole == 'admin') {
       switch (index) {
         case 0:
-          break;
+          Get.offAllNamed('/dashboard');
+          return;
         case 1:
-          DashboardAdminMenu.show(context);
+          DashboardAdminMenu.show(context); // submenu setting
           return;
         case 2:
-          Get.toNamed('/admin/hasil-vote');
+          Get.offAllNamed('/result');
           return;
         case 3:
-          Get.toNamed('/admin/profil');
+          Get.offAllNamed('/profile');
           return;
       }
     } else {
       switch (index) {
         case 0:
-          break;
+          Get.offAllNamed('/dashboard');
+          return;
         case 1:
-          Get.off(const VoteScreen());
-          break;
+          Get.offAllNamed('/vote');
+          return;
+        case 2:
+          Get.offAllNamed('/result');
+          return;
+        case 3:
+          Get.offAllNamed('/profile');
+          return;
       }
     }
-
-    setState(() {
-      _selectedIndex = index;
-    });
   }
 
   @override
@@ -163,9 +170,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: loggedInUserRole == 'admin'
-          ? CustomBottomNavBarAdmin(selectedIndex: _selectedIndex, onItemTapped: _onItemTapped)
-          : CustomBottomNavBarUser(selectedIndex: _selectedIndex, onItemTapped: _onItemTapped),
+      bottomNavigationBar: CustomBottomNavBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
+      ),
     );
   }
 
@@ -261,7 +269,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(kandidat['nama'] ?? '-', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                Text(kandidat['visi'] ?? '-', style: const TextStyle(color: Colors.grey)),
+                Text(kandidat['organisasi'] ?? '-', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(kandidat['label'] ?? '-', style: const TextStyle(color: Colors.grey)),
               ],
             ),
           ),

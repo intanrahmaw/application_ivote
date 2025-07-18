@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:application_ivote/models/candidates_model.dart';
 import 'package:application_ivote/services/candidate_supbase_service.dart';
-import 'package:application_ivote/widgets/custom_bottom_nav_bar_admin.dart';
+import 'package:application_ivote/widgets/custom_bottom_nav_bar.dart';
 import 'package:application_ivote/widgets/sub_menu_admin.dart';
 import 'package:application_ivote/utils/global_user.dart';
 import 'candidate_form_screen.dart';
+import 'package:application_ivote/screens/profile/profile_screen.dart';
 
 class CandidatListScreen extends StatefulWidget {
   const CandidatListScreen({super.key});
@@ -117,21 +118,30 @@ class _CandidatListScreenState extends State<CandidatListScreen> {
           Get.offAllNamed('/dashboard');
           return;
         case 1:
-          DashboardAdminMenu.show(context);
+          DashboardAdminMenu.show(context); // submenu setting
           return;
         case 2:
-          Get.offNamed('/admin/hasil-vote');
+          Get.offAllNamed('/result');
           return;
         case 3:
-          Get.offNamed('/admin/profil');
+          Get.offAllNamed('/profile');
           return;
       }
-    }
-
-    if (_selectedIndex != index) {
-      setState(() {
-        _selectedIndex = index;
-      });
+    } else {
+      switch (index) {
+        case 0:
+          Get.offAllNamed('/dashboard');
+          return;
+        case 1:
+          Get.offAllNamed('/vote');
+          return;
+        case 2:
+          Get.offAllNamed('/result');
+          return;
+        case 3:
+          Get.offAllNamed('/profile');
+          return;
+      }
     }
   }
 
@@ -149,6 +159,8 @@ class _CandidatListScreenState extends State<CandidatListScreen> {
         children: [
           Expanded(flex: 1, child: Text('No', style: TextStyle(fontWeight: FontWeight.bold))),
           Expanded(flex: 3, child: Text('Nama', style: TextStyle(fontWeight: FontWeight.bold))),
+          Expanded(flex: 3, child: Text('Organisasi', style: TextStyle(fontWeight: FontWeight.bold))),
+          Expanded(flex: 3, child: Text('Label', style: TextStyle(fontWeight: FontWeight.bold))),
           Expanded(flex: 3, child: Text('Visi', style: TextStyle(fontWeight: FontWeight.bold))),
           Expanded(flex: 3, child: Text('Misi', style: TextStyle(fontWeight: FontWeight.bold))),
           Expanded(flex: 2, child: Center(child: Text('Foto', style: TextStyle(fontWeight: FontWeight.bold)))),
@@ -168,6 +180,8 @@ class _CandidatListScreenState extends State<CandidatListScreen> {
         children: [
           Expanded(flex: 1, child: Text((index + 1).toString())),
           Expanded(flex: 3, child: Text(kandidat.nama)),
+          Expanded(flex: 3, child: Text(kandidat.organisasi)),
+          Expanded(flex: 3, child: Text(kandidat.label)),
           Expanded(flex: 3, child: Text(kandidat.visi, maxLines: 1, overflow: TextOverflow.ellipsis)),
           Expanded(flex: 3, child: Text(kandidat.misi, maxLines: 1, overflow: TextOverflow.ellipsis)),
           Expanded(
@@ -248,7 +262,7 @@ class _CandidatListScreenState extends State<CandidatListScreen> {
                       ),
               ),
             ),
-      bottomNavigationBar: CustomBottomNavBarAdmin(
+      bottomNavigationBar: CustomBottomNavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
       ),
