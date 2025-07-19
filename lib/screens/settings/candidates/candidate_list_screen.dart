@@ -18,8 +18,6 @@ class _CandidatListScreenState extends State<CandidatListScreen> {
   final SupabaseService _supabaseService = SupabaseService();
   List<Candidate> _kandidatList = [];
   bool _isLoading = true;
-
-  // 1. Variabel untuk indeks navbar
   final int _selectedIndex = 1;
 
   @override
@@ -56,15 +54,8 @@ class _CandidatListScreenState extends State<CandidatListScreen> {
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        icon: Icon(
-          Icons.warning_amber_rounded,
-          color: Colors.red.shade600,
-          size: 50,
-        ),
-        title: const Text(
-          'Konfirmasi Hapus',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        icon: Icon(Icons.warning_amber_rounded, color: Colors.red.shade600, size: 50),
+        title: const Text('Konfirmasi Hapus', style: TextStyle(fontWeight: FontWeight.bold)),
         content: const Text('Apakah Anda yakin ingin menghapus kandidat ini?'),
         actionsAlignment: MainAxisAlignment.spaceEvenly,
         actions: [
@@ -80,9 +71,7 @@ class _CandidatListScreenState extends State<CandidatListScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red.shade600,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
             ),
             child: const Text('Ya, Hapus'),
           ),
@@ -94,27 +83,17 @@ class _CandidatListScreenState extends State<CandidatListScreen> {
   Future<void> _deleteKandidat(String candidateId) async {
     try {
       await _supabaseService.deleteCandidate(candidateId);
-      Get.snackbar(
-        'Sukses',
-        'Kandidat berhasil dihapus',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      Get.snackbar('Sukses', 'Kandidat berhasil dihapus',
+          backgroundColor: Colors.green, colorText: Colors.white);
       _fetchKandidatList();
     } catch (e) {
-      Get.snackbar(
-        'Gagal',
-        'Gagal menghapus kandidat: $e',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Get.snackbar('Gagal', 'Gagal menghapus kandidat: $e',
+          backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
 
-  // 2. Fungsi untuk menangani tap pada navbar
   void _onItemTapped(int index) {
     if (index == _selectedIndex && index != 1) return;
-
     if (loggedInUserRole == 'admin') {
       switch (index) {
         case 0:
@@ -160,7 +139,6 @@ class _CandidatListScreenState extends State<CandidatListScreen> {
         backgroundColor: Colors.white,
         elevation: 1,
         shadowColor: Colors.grey.shade200,
-        // Tombol kembali otomatis ditangani oleh GetX saat navigasi
         iconTheme: const IconThemeData(color: Colors.black),
         actions: [
           Padding(
@@ -170,20 +148,16 @@ class _CandidatListScreenState extends State<CandidatListScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
               child: const Text('Tambah'),
             ),
           ),
         ],
       ),
-      body:
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _buildDataTable(),
-      // 3. Menambahkan bottomNavigationBar
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _buildDataTable(),
       bottomNavigationBar: CustomBottomNavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
@@ -199,14 +173,9 @@ class _CandidatListScreenState extends State<CandidatListScreen> {
           children: [
             Icon(Icons.people_outline, size: 80, color: Colors.grey[300]),
             const SizedBox(height: 16),
-            const Text(
-              "Belum Ada Kandidat",
-              style: TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-            const Text(
-              "Tekan tombol 'Tambah' untuk menambahkan kandidat baru.",
-              style: TextStyle(color: Colors.grey),
-            ),
+            const Text("Belum Ada Kandidat", style: TextStyle(fontSize: 18, color: Colors.grey)),
+            const Text("Tekan tombol 'Tambah' untuk menambahkan kandidat baru.",
+                style: TextStyle(color: Colors.grey)),
           ],
         ),
       );
@@ -222,43 +191,18 @@ class _CandidatListScreenState extends State<CandidatListScreen> {
               onEdit: (kandidat) => _navigateAndRefresh(kandidat: kandidat),
               onDelete: (id) => _showDeleteDialog(id),
             ),
-            header: const Text(
-              'Daftar Kandidat',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+            header: const Text('Daftar Kandidat', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             columns: const [
-              DataColumn(
-                label: Text(
-                  'No',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              DataColumn(
-                label: Text(
-                  'Nama',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              DataColumn(
-                label: Text(
-                  'Prodi',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              DataColumn(
-                label: Text(
-                  'Foto',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              DataColumn(
-                label: Text(
-                  'Aksi',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
+              DataColumn(label: Text('No', style: TextStyle(fontWeight: FontWeight.bold))),
+              DataColumn(label: Text('Nama', style: TextStyle(fontWeight: FontWeight.bold))),
+              DataColumn(label: Text('Organisasi', style: TextStyle(fontWeight: FontWeight.bold))),
+              DataColumn(label: Text('Label', style: TextStyle(fontWeight: FontWeight.bold))),
+              DataColumn(label: Text('Visi', style: TextStyle(fontWeight: FontWeight.bold))),
+              DataColumn(label: Text('Misi', style: TextStyle(fontWeight: FontWeight.bold))),
+              DataColumn(label: Text('Foto', style: TextStyle(fontWeight: FontWeight.bold))),
+              DataColumn(label: Text('Aksi', style: TextStyle(fontWeight: FontWeight.bold))),
             ],
-            columnSpacing: 30,
+            columnSpacing: 20,
             horizontalMargin: 20,
             rowsPerPage: 10,
             showCheckboxColumn: false,
@@ -269,7 +213,6 @@ class _CandidatListScreenState extends State<CandidatListScreen> {
   }
 }
 
-// Class Data Source untuk PaginatedDataTable
 class _CandidateDataSource extends DataTableSource {
   final List<Candidate> kandidatList;
   final Function(Candidate) onEdit;
@@ -285,65 +228,41 @@ class _CandidateDataSource extends DataTableSource {
   DataRow? getRow(int index) {
     if (index >= kandidatList.length) return null;
     final kandidat = kandidatList[index];
-    final imageUrl = kandidat.imageUrl;
 
-    return DataRow(
-      cells: [
-        DataCell(Text((index + 1).toString())),
-        DataCell(Text(kandidat.nama)),
-        DataCell(
-          Text(kandidat.organisasi),
-        ), // Menggunakan 'organisasi' sebagai 'Prodi'
-        DataCell(
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0),
-            child:
-                (imageUrl != null && imageUrl.isNotEmpty)
-                    ? ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: Image.network(
-                        imageUrl,
-                        width: 40,
-                        height: 40,
-                        fit: BoxFit.cover,
-                        errorBuilder:
-                            (context, error, stackTrace) => const Icon(
-                              Icons.error_outline,
-                              color: Colors.red,
-                            ),
-                      ),
-                    )
-                    : const Icon(
-                      Icons.image_not_supported_outlined,
-                      color: Colors.grey,
-                    ),
-          ),
-        ),
-        DataCell(
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.edit, color: Colors.green),
-                onPressed: () => onEdit(kandidat),
-                tooltip: 'Ubah Data',
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () => onDelete(kandidat.candidateId),
-                tooltip: 'Hapus Data',
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
+    return DataRow(cells: [
+      DataCell(Text((index + 1).toString())),
+      DataCell(Text(kandidat.nama)),
+      DataCell(Text(kandidat.organisasi)),
+      DataCell(Text(kandidat.label)),
+      DataCell(Text(kandidat.visi, maxLines: 2, overflow: TextOverflow.ellipsis)),
+      DataCell(Text(kandidat.misi, maxLines: 2, overflow: TextOverflow.ellipsis)),
+      DataCell(
+        (kandidat.imageUrl != null && kandidat.imageUrl!.isNotEmpty)
+            ? Image.network(
+                kandidat.imageUrl!,
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => const Icon(Icons.error_outline, color: Colors.red),
+              )
+            : const Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+      ),
+      DataCell(Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(icon: const Icon(Icons.edit, color: Colors.green), onPressed: () => onEdit(kandidat)),
+          IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => onDelete(kandidat.candidateId)),
+        ],
+      )),
+    ]);
   }
 
   @override
   bool get isRowCountApproximate => false;
+
   @override
   int get rowCount => kandidatList.length;
+
   @override
   int get selectedRowCount => 0;
 }
