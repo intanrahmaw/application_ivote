@@ -4,27 +4,23 @@ import 'package:flutter/material.dart';
 class ElectionListTable extends StatelessWidget {
   final List<Elections> elections;
   final void Function(Elections election) onEdit;
-  final void Function(String electionId) onDelete;
 
   const ElectionListTable({
     super.key,
     required this.elections,
     required this.onEdit,
-    required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
-    
     return Card(
       elevation: 3,
       shadowColor: Colors.black.withOpacity(0.1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      clipBehavior: Clip.antiAlias, // Penting agar DataTable mengikuti bentuk Card
+      clipBehavior: Clip.antiAlias,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: DataTable(
-          // 2. Styling yang ditingkatkan
           headingRowColor:
               WidgetStateColor.resolveWith((states) => Colors.deepPurple.shade50),
           headingTextStyle: const TextStyle(
@@ -37,6 +33,7 @@ class ElectionListTable extends StatelessWidget {
           columns: const [
             DataColumn(label: Text('No')),
             DataColumn(label: Text('Judul')),
+            DataColumn(label: Text('Deskripsi')),
             DataColumn(label: Text('Mulai')),
             DataColumn(label: Text('Selesai')),
             DataColumn(label: Center(child: Text('Status'))),
@@ -44,7 +41,6 @@ class ElectionListTable extends StatelessWidget {
           ],
           rows: List.generate(elections.length, (index) {
             final e = elections[index];
-            // 3. Tambahkan warna selang-seling untuk keterbacaan (Zebra Stripes)
             final rowColor = index.isEven
                 ? Colors.transparent
                 : Colors.grey.withOpacity(0.05);
@@ -55,8 +51,14 @@ class ElectionListTable extends StatelessWidget {
                 DataCell(Text('${index + 1}')),
                 DataCell(
                   ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 250), // Batasi lebar judul
+                    constraints: const BoxConstraints(maxWidth: 150),
                     child: Text(e.judul, overflow: TextOverflow.ellipsis),
+                  ),
+                ),
+                DataCell(
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 200),
+                    child: Text(e.deskripsi ?? '-', overflow: TextOverflow.ellipsis),
                   ),
                 ),
                 DataCell(Text(_formatDate(e.startTime))),
@@ -64,7 +66,7 @@ class ElectionListTable extends StatelessWidget {
                 DataCell(
                   Center(
                     child: Chip(
-                      label: Text(e.isActive ? 'Aktif' : 'Tidak Aktif'),
+                      label: Text(e.isActive ? 'Aktif' : 'Selesai'),
                       backgroundColor: e.isActive
                           ? Colors.green.shade100
                           : Colors.red.shade100,
@@ -89,12 +91,6 @@ class ElectionListTable extends StatelessWidget {
                         onPressed: () => onEdit(e),
                         splashRadius: 20,
                       ),
-                      IconButton(
-                        tooltip: 'Hapus',
-                        icon: const Icon(Icons.delete_forever_rounded, color: Colors.redAccent),
-                        onPressed: () => onDelete(e.electionId),
-                        splashRadius: 20,
-                      ),
                     ],
                   ),
                 ),
@@ -106,7 +102,6 @@ class ElectionListTable extends StatelessWidget {
     );
   }
 
-  /// Format tanggal yyyy-MM-dd
   static String _formatDate(DateTime date) {
     return '${date.year.toString().padLeft(4, '0')}-'
         '${date.month.toString().padLeft(2, '0')}-'

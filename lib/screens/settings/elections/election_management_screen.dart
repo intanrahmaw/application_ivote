@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:application_ivote/utils/app_routes.dart';
-import 'package:application_ivote/screens/home/dashboard_screen.dart';
 import 'package:application_ivote/models/elections_model.dart';
 import 'package:application_ivote/screens/settings/elections/election_form_screen.dart';
 import 'package:application_ivote/screens/settings/elections/election_list_table.dart';
@@ -9,7 +8,6 @@ import 'package:application_ivote/services/election_supabase_service.dart';
 import 'package:application_ivote/widgets/custom_bottom_nav_bar.dart';
 import 'package:application_ivote/widgets/sub_menu_admin.dart';
 import 'package:application_ivote/utils/global_user.dart';
-import 'package:application_ivote/screens/profile/profile_screen.dart';
 
 class ElectionManagementScreen extends StatefulWidget {
   const ElectionManagementScreen({super.key});
@@ -56,78 +54,6 @@ class _ElectionManagementScreenState extends State<ElectionManagementScreen> {
     }
   }
 
-  Future<void> _deleteElection(String electionId) async {
-    try {
-      await _supabaseService.deleteElection(electionId);
-      Get.snackbar('Sukses', 'Election dihapus',
-          backgroundColor: Colors.green, colorText: Colors.white);
-      _fetchelections();
-    } catch (e) {
-      Get.snackbar('Error', 'Gagal menghapus election: $e',
-          backgroundColor: Colors.red, colorText: Colors.white);
-    }
-  }
-
-  void _showDeleteDialog(String electionId) {
-    Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.cancel, color: Colors.red, size: 64),
-              const SizedBox(height: 16),
-              const Text(
-                'Apakah anda yakin\nmenghapus data ini?',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                      _deleteElection(electionId);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                    ),
-                    child: const Text('Hapus'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => Get.back(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                    ),
-                    child: const Text('Batal'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   void _navigateAndRefresh({Elections? election}) async {
     final result = await Get.to(() => ElectionFormScreen(election: election));
     if (result == true) _fetchelections();
@@ -140,7 +66,7 @@ class _ElectionManagementScreenState extends State<ElectionManagementScreen> {
           Get.offAllNamed('/dashboard');
           return;
         case 1:
-          SubMenuAdmin.show(context); // submenu setting
+          SubMenuAdmin.show(context);
           return;
         case 2:
           Get.offAllNamed('/result');
@@ -170,7 +96,7 @@ class _ElectionManagementScreenState extends State<ElectionManagementScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: const Color(0xFFF1F3F6),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
@@ -178,12 +104,15 @@ class _ElectionManagementScreenState extends State<ElectionManagementScreen> {
         elevation: 1,
         title: const Text(
           'Manajemen Election',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
         ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: ElevatedButton(
+            child: ElevatedButton.icon(
               onPressed: () {
                 bool hasActiveElection = _electionList.any((e) => e.isActive);
                 if (hasActiveElection) {
@@ -197,15 +126,16 @@ class _ElectionManagementScreenState extends State<ElectionManagementScreen> {
                   _navigateAndRefresh();
                 }
               },
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('Tambah'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               ),
-              child: const Text('Tambah'),
             ),
           ),
         ],
@@ -221,7 +151,15 @@ class _ElectionManagementScreenState extends State<ElectionManagementScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: _electionList.isEmpty
-                    ? const Center(child: Text('Belum ada data election.'))
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Text(
+                            'Belum ada data election.',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                      )
                     : LayoutBuilder(
                         builder: (context, constraints) {
                           return SingleChildScrollView(
@@ -233,7 +171,7 @@ class _ElectionManagementScreenState extends State<ElectionManagementScreen> {
                                 child: ElectionListTable(
                                   elections: _electionList,
                                   onEdit: (election) => _navigateAndRefresh(election: election),
-                                  onDelete: (electionId) => _showDeleteDialog(electionId),
+                                  // onDelete dihapus
                                 ),
                               ),
                             ),

@@ -15,10 +15,6 @@ class SupabaseService {
     }
   }
 
-  Future<void> deleteElection(String electionId) async {
-    await supabase.from('elections').delete().eq('elections_id', electionId);
-  }
-
   Future<void> addElection({
     required String judul,
     required String deskripsi,
