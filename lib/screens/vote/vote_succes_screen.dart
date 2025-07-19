@@ -8,61 +8,72 @@ class VoteSuccessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF5F6FA),
       body: Center(
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 30),
-          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+          margin: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             boxShadow: const [
               BoxShadow(
                 color: Colors.black12,
-                blurRadius: 10,
-                offset: Offset(0, 5),
+                blurRadius: 12,
+                offset: Offset(0, 6),
               ),
             ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              const Icon(
+                Icons.how_to_vote_rounded,
+                color: Colors.deepPurple,
+                size: 80,
+              ),
+              const SizedBox(height: 20),
               const Text(
-                'Terima kasih sudah\nvote',
+                'Vote Berhasil!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'Terima kasih telah berpartisipasi dalam pemilu ini.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
                   color: Colors.black54,
                 ),
               ),
-              const SizedBox(height: 20),
-              const Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 50,
-              ),
               const SizedBox(height: 30),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.bar_chart_rounded, size: 20),
+                  label: const Text(
+                    'Lihat Hasil Vote',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  onPressed: () => Get.to(() => const VoteResultScreen()),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
                   ),
                 ),
-                onPressed: () {
-                  // Ganti dengan navigasi ke halaman hasil vote kamu
-                  Get.to(() => const VoteResultScreen());
-                },
-                child: const Text(
-                  'Lihat Hasil Vote',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              )
+              ),
             ],
           ),
         ),

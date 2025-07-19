@@ -16,8 +16,7 @@ class VoteScreen extends StatefulWidget {
 }
 
 class _VoteScreenState extends State<VoteScreen> {
-  final int _selectedIndex = 1; // Halaman ini adalah indeks ke-1
-
+  final int _selectedIndex = 1;
   List<Map<String, dynamic>> candidates = [];
   bool isLoading = true;
 
@@ -27,14 +26,11 @@ class _VoteScreenState extends State<VoteScreen> {
     fetchCandidates();
   }
 
-  // --- SEMUA LOGIKA ANDA TETAP SAMA & AMAN ---
   Future<void> fetchCandidates() async {
     try {
       final response = await supabase
           .from('candidates')
-          .select(
-            'candidate_id, nama, image_url, elections_id, elections!inner(is_active)',
-          )
+          .select('candidate_id, nama, image_url, organisasi, label, elections_id, elections!inner(is_active)')
           .eq('elections.is_active', true);
 
       if (mounted) {
@@ -51,22 +47,23 @@ class _VoteScreenState extends State<VoteScreen> {
 
   Future<void> voteForCandidate(String candidateId, String electionId) async {
     try {
-      final candidate =
-          await supabase
-              .from('candidates')
-              .select('organisasi')
-              .eq('candidate_id', candidateId)
-              .maybeSingle();
+      final candidate = await supabase
+          .from('candidates')
+          .select('organisasi')
+          .eq('candidate_id', candidateId)
+          .maybeSingle();
       final selectedOrg = candidate?['organisasi'];
       if (selectedOrg == null) {
         Get.snackbar('Error', 'Organisasi tidak ditemukan.');
         return;
       }
+
       final orgCandidates = await supabase
           .from('candidates')
           .select('candidate_id')
           .eq('organisasi', selectedOrg);
       final candidateIds = orgCandidates.map((c) => c['candidate_id']).toList();
+
       final existingVote = await supabase
           .from('votes')
           .select('vote_id')
@@ -82,11 +79,13 @@ class _VoteScreenState extends State<VoteScreen> {
         );
         return;
       }
+
       await supabase.from('votes').insert({
         'user_id': loggedInUserId,
         'candidate_id': candidateId,
         'elections_id': electionId,
       });
+
       Get.offAll(() => const VoteSuccessScreen());
     } catch (e) {
       Get.snackbar(
@@ -138,24 +137,12 @@ class _VoteScreenState extends State<VoteScreen> {
       }
     }
   }
-  // --- AKHIR DARI LOGIKA ANDA ---
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title: const Text("Halaman Voting"),
-        centerTitle: true,
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        elevation: 2,
-        automaticallyImplyLeading: false,
-      ),
-      body:
-          isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _buildBody(),
+      body: isLoading ? const Center(child: CircularProgressIndicator()) : _buildBody(),
       bottomNavigationBar: CustomBottomNavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
@@ -163,35 +150,17 @@ class _VoteScreenState extends State<VoteScreen> {
     );
   }
 
-  // Widget helper untuk membangun body utama
   Widget _buildBody() {
-    if (candidates.isEmpty) {
-      return _buildEmptyState();
-    }
+    if (candidates.isEmpty) return _buildEmptyState();
 
-    // Gunakan ListView agar kita bisa menambahkan header di atas list
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Judul sebelum daftar kandidat
-        const Text(
-          "Daftar Kandidat",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black54,
-          ),
-        ),
-        const SizedBox(height: 12),
-        // Menggunakan operator spread (...) untuk memasukkan list widget ke dalam children
-        ...candidates
-            .map((candidate) => _buildCandidateCard(candidate))
-            .toList(),
+        ...candidates.map((candidate) => _buildCandidateCard(candidate)).toList(),
       ],
     );
   }
 
-  // Widget untuk menampilkan pesan jika tidak ada kandidat
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -203,50 +172,58 @@ class _VoteScreenState extends State<VoteScreen> {
             "Tidak Ada Pemilihan Aktif",
             style: TextStyle(fontSize: 18, color: Colors.grey[600]),
           ),
-          const Text(
-            "Silakan kembali lagi nanti.",
-            style: TextStyle(color: Colors.grey),
-          ),
+          const Text("Silakan kembali lagi nanti.", style: TextStyle(color: Colors.grey)),
         ],
       ),
     );
   }
 
-  // Widget untuk setiap kartu kandidat
   Widget _buildCandidateCard(Map<String, dynamic> candidate) {
     final imageUrl = candidate['image_url'] ?? '';
     final nama = candidate['nama'] ?? 'Nama Kandidat';
+    final organisasi = candidate['organisasi'] ?? '-';
+    final label = candidate['label'] ?? '-';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      elevation: 4,
-      shadowColor: Colors.black.withOpacity(0.1),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CircleAvatar(
               radius: 30,
-              backgroundColor: Colors.grey[200],
-              backgroundImage:
-                  imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
-              child:
-                  imageUrl.isEmpty
-                      ? const Icon(Icons.person, size: 30, color: Colors.grey)
-                      : null,
+              backgroundColor: Colors.grey[300],
+              backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+              child: imageUrl.isEmpty ? const Icon(Icons.person, size: 30, color: Colors.grey) : null,
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: Text(
-                nama,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    nama,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Organisasi: $organisasi",
+                    style: const TextStyle(fontSize: 14, color: Colors.black54),
+                  ),
+                  Text(
+                    "No urut: $label",
+                    style: const TextStyle(fontSize: 14, color: Colors.black54),
+                  ),
+                ],
               ),
             ),
+            const SizedBox(width: 8),
             ElevatedButton.icon(
               onPressed: () => _handleVote(candidate),
               icon: const Icon(Icons.how_to_vote, size: 18),
@@ -254,13 +231,8 @@ class _VoteScreenState extends State<VoteScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
               ),
             ),
           ],

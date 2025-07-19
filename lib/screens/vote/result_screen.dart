@@ -27,7 +27,6 @@ class _VoteResultScreenState extends State<VoteResultScreen> {
     fetchVoteResults();
   }
 
-  // --- SEMUA LOGIKA ANDA TETAP SAMA & AMAN ---
   Future<void> fetchVoteResults() async {
     try {
       final candidates = await supabase
@@ -49,16 +48,15 @@ class _VoteResultScreenState extends State<VoteResultScreen> {
 
       int total = voteCounts.values.fold(0, (sum, count) => sum + count);
 
-      List<Map<String, dynamic>> merged =
-          candidates.map((candidate) {
-            final id = candidate['candidate_id'].toString();
-            final count = voteCounts[id] ?? 0;
-            return {
-              'nama': candidate['nama'],
-              'image_url': candidate['image_url'],
-              'vote_count': count,
-            };
-          }).toList();
+      List<Map<String, dynamic>> merged = candidates.map((candidate) {
+        final id = candidate['candidate_id'].toString();
+        final count = voteCounts[id] ?? 0;
+        return {
+          'nama': candidate['nama'],
+          'image_url': candidate['image_url'],
+          'vote_count': count,
+        };
+      }).toList();
 
       merged.sort((a, b) => b['vote_count'].compareTo(a['vote_count']));
 
@@ -76,6 +74,7 @@ class _VoteResultScreenState extends State<VoteResultScreen> {
 
   void _onItemTapped(int index) {
     if (index == _selectedIndex) return;
+
     if (loggedInUserRole == 'admin') {
       switch (index) {
         case 0:
@@ -113,18 +112,9 @@ class _VoteResultScreenState extends State<VoteResultScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title: const Text("Hasil Voting"),
-        centerTitle: true,
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        elevation: 2,
-        automaticallyImplyLeading: false,
-      ),
-      body:
-          isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _buildBody(),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _buildBody(),
       bottomNavigationBar: CustomBottomNavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
@@ -149,19 +139,16 @@ class _VoteResultScreenState extends State<VoteResultScreen> {
       );
     }
 
-    // Menggunakan ListView.builder agar lebih efisien dan mudah menambahkan header
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: results.length + 1, // +1 untuk kartu header
+      itemCount: results.length + 1,
       itemBuilder: (context, index) {
-        // Item pertama adalah kartu header
         if (index == 0) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
             child: _buildTotalVotesCard(),
           );
         }
-        // Item selanjutnya adalah kartu kandidat
         final resultIndex = index - 1;
         return _buildResultCard(results[resultIndex], resultIndex);
       },
@@ -228,21 +215,16 @@ class _VoteResultScreenState extends State<VoteResultScreen> {
           children: [
             Row(
               children: [
-                _buildRankIcon(rank), // Ikon Peringkat/Medali
+                _buildRankIcon(rank),
                 const SizedBox(width: 12),
                 CircleAvatar(
                   radius: 25,
                   backgroundColor: Colors.grey[200],
                   backgroundImage:
                       imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
-                  child:
-                      imageUrl.isEmpty
-                          ? const Icon(
-                            Icons.person,
-                            size: 25,
-                            color: Colors.grey,
-                          )
-                          : null,
+                  child: imageUrl.isEmpty
+                      ? const Icon(Icons.person, size: 25, color: Colors.grey)
+                      : null,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -290,15 +272,9 @@ class _VoteResultScreenState extends State<VoteResultScreen> {
   }
 
   Widget _buildRankIcon(int rank) {
-    if (rank == 0) {
-      return const Text("🥇", style: TextStyle(fontSize: 24));
-    }
-    if (rank == 1) {
-      return const Text("🥈", style: TextStyle(fontSize: 24));
-    }
-    if (rank == 2) {
-      return const Text("🥉", style: TextStyle(fontSize: 24));
-    }
+    if (rank == 0) return const Text("🥇", style: TextStyle(fontSize: 24));
+    if (rank == 1) return const Text("🥈", style: TextStyle(fontSize: 24));
+    if (rank == 2) return const Text("🥉", style: TextStyle(fontSize: 24));
     return Text(
       "${rank + 1}.",
       style: TextStyle(
