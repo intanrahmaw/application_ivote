@@ -52,48 +52,93 @@ class _CandidatListScreenState extends State<CandidatListScreen> {
 
   void _showDeleteDialog(String candidateId) {
     Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        icon: Icon(Icons.warning_amber_rounded, color: Colors.red.shade600, size: 50),
-        title: const Text('Konfirmasi Hapus', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text('Apakah Anda yakin ingin menghapus kandidat ini?'),
-        actionsAlignment: MainAxisAlignment.spaceEvenly,
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Batal', style: TextStyle(color: Colors.grey)),
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.warning, color: Colors.red, size: 60),
+              const SizedBox(height: 16),
+              const Text(
+                'Yakin ingin menghapus kandidat ini?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.back();
+                      _deleteKandidat(candidateId);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 12,
+                      ),
+                    ),
+                    child: const Text('Hapus'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Get.back(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 12,
+                      ),
+                    ),
+                    child: const Text('Batal'),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              _deleteKandidat(candidateId);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade600,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-            ),
-            child: const Text('Ya, Hapus'),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Future<void> _deleteKandidat(String candidateId) async {
-    try {
-      await _supabaseService.deleteCandidate(candidateId);
-      Get.snackbar('Sukses', 'Kandidat berhasil dihapus',
-          backgroundColor: Colors.green, colorText: Colors.white);
-      _fetchKandidatList();
-    } catch (e) {
-      Get.snackbar('Gagal', 'Gagal menghapus kandidat: $e',
-          backgroundColor: Colors.red, colorText: Colors.white);
-    }
+  try {
+    // Hapus kandidat beserta semua suaranya
+    await _supabaseService.deleteCandidate(candidateId);
+
+    Get.snackbar(
+      'Berhasil',
+      'Kandidat dan seluruh suara terkait berhasil dihapus.',
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+    );
+    _fetchKandidatList();
+  } catch (e) {
+    Get.snackbar(
+      'Gagal',
+      'Gagal menghapus kandidat: $e',
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
   }
+}
+
 
   void _onItemTapped(int index) {
-    if (index == _selectedIndex && index != 1) return;
     if (loggedInUserRole == 'admin') {
       switch (index) {
         case 0:
@@ -130,139 +175,152 @@ class _CandidatListScreenState extends State<CandidatListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF1F3F6),
       appBar: AppBar(
-        title: const Text(
-          "Manajemen Kandidat",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
-        ),
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         elevation: 1,
-        shadowColor: Colors.grey.shade200,
-        iconTheme: const IconThemeData(color: Colors.black),
+        title: const Text(
+          'Manajemen Kandidat',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: ElevatedButton(
+            padding: const EdgeInsets.only(right: 16),
+            child: ElevatedButton.icon(
               onPressed: () => _navigateAndRefresh(),
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('Tambah'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               ),
-              child: const Text('Tambah'),
             ),
           ),
         ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _buildDataTable(),
+          : Padding(
+              padding: const EdgeInsets.all(16),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: _kandidatList.isEmpty
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Text('Belum ada data kandidat.', style: TextStyle(color: Colors.grey)),
+                        ),
+                      )
+                    : LayoutBuilder(
+                        builder: (context, constraints) {
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                              child: SingleChildScrollView(
+                                padding: const EdgeInsets.all(8),
+                                child: DataTable(
+                                  headingRowColor: MaterialStateColor.resolveWith(
+                                      (states) => Colors.deepPurple.shade50),
+                                  headingTextStyle: const TextStyle(
+                                      fontWeight: FontWeight.bold, color: Colors.black87),
+                                  columnSpacing: 30,
+                                  horizontalMargin: 20,
+                                  columns: const [
+                                    DataColumn(label: Text('No')),
+                                    DataColumn(label: Text('Nama')),
+                                    DataColumn(label: Text('Organisasi')),
+                                    DataColumn(label: Text('Label')),
+                                    DataColumn(label: Text('Visi')),
+                                    DataColumn(label: Text('Misi')),
+                                    DataColumn(label: Text('Foto')),
+                                    DataColumn(label: Center(child: Text('Aksi'))),
+                                  ],
+                                  rows: List<DataRow>.generate(
+                                    _kandidatList.length,
+                                    (index) {
+                                      final kandidat = _kandidatList[index];
+                                      final rowColor = index.isEven
+                                          ? Colors.grey.withOpacity(0.05)
+                                          : Colors.transparent;
+
+                                      return DataRow(
+                                        color: MaterialStateProperty.resolveWith((states) => rowColor),
+                                        cells: [
+                                          DataCell(Text('${index + 1}')),
+                                          DataCell(Text(kandidat.nama)),
+                                          DataCell(Text(kandidat.organisasi)),
+                                          DataCell(Text(kandidat.label)),
+                                          DataCell(Text(
+                                            kandidat.visi,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          )),
+                                          DataCell(Text(
+                                            kandidat.misi,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          )),
+                                          DataCell(
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(8),
+                                              child: kandidat.imageUrl != null &&
+                                                      kandidat.imageUrl!.isNotEmpty
+                                                  ? Image.network(
+                                                      kandidat.imageUrl!,
+                                                      width: 50,
+                                                      height: 50,
+                                                      fit: BoxFit.cover,
+                                                      errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+                                                    )
+                                                  : const Icon(Icons.image_not_supported, color: Colors.grey),
+                                            ),
+                                          ),
+                                          DataCell(
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                IconButton(
+                                                  icon: const Icon(Icons.edit_rounded, color: Colors.blue),
+                                                  tooltip: 'Edit Kandidat',
+                                                  onPressed: () => _navigateAndRefresh(kandidat: kandidat),
+                                                  splashRadius: 20,
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(Icons.delete_forever_rounded,
+                                                      color: Colors.red),
+                                                  tooltip: 'Hapus Kandidat',
+                                                  onPressed: () =>
+                                                      _showDeleteDialog(kandidat.candidateId),
+                                                  splashRadius: 20,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ),
       bottomNavigationBar: CustomBottomNavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
       ),
     );
   }
-
-  Widget _buildDataTable() {
-    if (_kandidatList.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.people_outline, size: 80, color: Colors.grey[300]),
-            const SizedBox(height: 16),
-            const Text("Belum Ada Kandidat", style: TextStyle(fontSize: 18, color: Colors.grey)),
-            const Text("Tekan tombol 'Tambah' untuk menambahkan kandidat baru.",
-                style: TextStyle(color: Colors.grey)),
-          ],
-        ),
-      );
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: PaginatedDataTable(
-            source: _CandidateDataSource(
-              kandidatList: _kandidatList,
-              onEdit: (kandidat) => _navigateAndRefresh(kandidat: kandidat),
-              onDelete: (id) => _showDeleteDialog(id),
-            ),
-            header: const Text('Daftar Kandidat', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            columns: const [
-              DataColumn(label: Text('No', style: TextStyle(fontWeight: FontWeight.bold))),
-              DataColumn(label: Text('Nama', style: TextStyle(fontWeight: FontWeight.bold))),
-              DataColumn(label: Text('Organisasi', style: TextStyle(fontWeight: FontWeight.bold))),
-              DataColumn(label: Text('Label', style: TextStyle(fontWeight: FontWeight.bold))),
-              DataColumn(label: Text('Visi', style: TextStyle(fontWeight: FontWeight.bold))),
-              DataColumn(label: Text('Misi', style: TextStyle(fontWeight: FontWeight.bold))),
-              DataColumn(label: Text('Foto', style: TextStyle(fontWeight: FontWeight.bold))),
-              DataColumn(label: Text('Aksi', style: TextStyle(fontWeight: FontWeight.bold))),
-            ],
-            columnSpacing: 20,
-            horizontalMargin: 20,
-            rowsPerPage: 10,
-            showCheckboxColumn: false,
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _CandidateDataSource extends DataTableSource {
-  final List<Candidate> kandidatList;
-  final Function(Candidate) onEdit;
-  final Function(String) onDelete;
-
-  _CandidateDataSource({
-    required this.kandidatList,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  @override
-  DataRow? getRow(int index) {
-    if (index >= kandidatList.length) return null;
-    final kandidat = kandidatList[index];
-
-    return DataRow(cells: [
-      DataCell(Text((index + 1).toString())),
-      DataCell(Text(kandidat.nama)),
-      DataCell(Text(kandidat.organisasi)),
-      DataCell(Text(kandidat.label)),
-      DataCell(Text(kandidat.visi, maxLines: 2, overflow: TextOverflow.ellipsis)),
-      DataCell(Text(kandidat.misi, maxLines: 2, overflow: TextOverflow.ellipsis)),
-      DataCell(
-        (kandidat.imageUrl != null && kandidat.imageUrl!.isNotEmpty)
-            ? Image.network(
-                kandidat.imageUrl!,
-                width: 50,
-                height: 50,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => const Icon(Icons.error_outline, color: Colors.red),
-              )
-            : const Icon(Icons.image_not_supported_outlined, color: Colors.grey),
-      ),
-      DataCell(Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(icon: const Icon(Icons.edit, color: Colors.green), onPressed: () => onEdit(kandidat)),
-          IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => onDelete(kandidat.candidateId)),
-        ],
-      )),
-    ]);
-  }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => kandidatList.length;
-
-  @override
-  int get selectedRowCount => 0;
 }

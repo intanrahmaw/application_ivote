@@ -22,10 +22,23 @@ class SupabaseService {
     return List<Map<String, dynamic>>.from(response);
   }
 
-  // Hapus kandidat berdasarkan ID
-  Future<void> deleteCandidate(String candidateId) async {
-    await supabase.from('candidates').delete().eq('candidate_id', candidateId);
-  }
+  Future<void> deleteVotesByCandidate(String candidateId) async {
+  await supabase
+      .from('votes')
+      .delete()
+      .eq('candidate_id', candidateId);
+}
+
+Future<void> deleteCandidate(String candidateId) async {
+  // Hapus semua suara terlebih dahulu
+  await deleteVotesByCandidate(candidateId);
+
+  // Lalu hapus kandidat
+  await supabase
+      .from('candidates')
+      .delete()
+      .eq('candidate_id', candidateId);
+}
 
   // Tambah kandidat baru
   Future<void> addCandidate({
