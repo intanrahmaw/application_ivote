@@ -4,6 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:application_ivote/screens/auth/login_screen.dart';
 import 'package:application_ivote/screens/profile/edit_account_screen.dart';
 import 'package:application_ivote/utils/global_user.dart';
+import 'package:application_ivote/widgets/sub_menu_admin.dart';
+import 'package:application_ivote/widgets/custom_bottom_nav_bar.dart'; // ← Tambahkan ini
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -17,6 +19,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String displayName = 'Loading...';
   String? avatarUrl;
   bool isLoading = true;
+  int _selectedIndex = 3; // ← Profil tab index
 
   @override
   void initState() {
@@ -25,9 +28,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUserProfile() async {
-    print('🧾 Username login: $loggedInUserName');
-    print('🧾 Role login: $loggedInUserRole');
-
     if (loggedInUserName.isEmpty || loggedInUserRole.isEmpty) {
       Get.offAll(() => const LoginScreen());
       return;
@@ -35,33 +35,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final table = (loggedInUserRole.toLowerCase() == 'admin') ? 'admin' : 'users';
-      print('🔍 Mencari username: $loggedInUserName di tabel: $table');
-
       final data = await supabase
           .from(table)
           .select()
           .ilike('username', loggedInUserName.trim())
           .maybeSingle();
 
-      print('📦 Data supabase: $data');
-
       if (!mounted) return;
 
-      if (data == null) {
-        setState(() {
-          displayName = 'Data tidak ditemukan';
-          avatarUrl = null;
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          displayName = data['username'] ?? 'Pengguna';
-          avatarUrl = data['avatar_url'] ?? '';
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      print("❌ Gagal ambil data profil: $e");
+      setState(() {
+        displayName = data?['username'] ?? 'Pengguna';
+        avatarUrl = data?['avatar_url'] ?? '';
+        isLoading = false;
+      });
+    } catch (_) {
       if (!mounted) return;
       setState(() {
         displayName = 'Gagal Ambil Nama';
@@ -77,60 +64,143 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Get.offAll(() => const LoginScreen());
   }
 
+  void _onItemTapped(int index) {
+    if (index == _selectedIndex) return;
+
+    if (loggedInUserRole == 'admin') {
+      switch (index) {
+        case 0:
+          Get.offAllNamed('/dashboard');
+          break;
+        case 1:
+          SubMenuAdmin.show(context);
+          break;
+        case 2:
+          Get.offAllNamed('/result');
+          break;
+        case 3:
+          Get.offAllNamed('/profile');
+          break;
+      }
+    } else {
+      switch (index) {
+        case 0:
+          Get.offAllNamed('/dashboard');
+          break;
+        case 1:
+          Get.offAllNamed('/vote');
+          break;
+        case 2:
+          Get.offAllNamed('/result');
+          break;
+        case 3:
+          Get.offAllNamed('/profile');
+          break;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profil Saya'),
-        centerTitle: true,
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-      ),
+      backgroundColor: const Color(0xFFF7F7F7),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(30),
-          child: isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Column(
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
                   children: [
                     const SizedBox(height: 30),
                     CircleAvatar(
-                      radius: 45,
+                      radius: 50,
                       backgroundImage: (avatarUrl != null && avatarUrl!.isNotEmpty)
                           ? NetworkImage(avatarUrl!)
                           : null,
                       backgroundColor: Colors.grey[200],
                       child: (avatarUrl == null || avatarUrl!.isEmpty)
-                          ? const Icon(Icons.person, size: 45, color: Colors.grey)
+                          ? const Icon(Icons.person, size: 50, color: Colors.grey)
                           : null,
                     ),
                     const SizedBox(height: 15),
                     Text(
                       displayName,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
                     ),
                     const SizedBox(height: 40),
-                    ListTile(
+                    _buildProfileOption(
+                      icon: Icons.edit,
+                      text: 'Edit Profil',
                       onTap: () async {
                         await Get.to(() => const EditAccountScreen());
-                        _loadUserProfile(); // Refresh profil setelah diedit
+                        _loadUserProfile();
                       },
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.grey[100],
-                        child: const Icon(Icons.edit, color: Colors.black),
-                      ),
-                      title: const Text('Edit Profil'),
                     ),
-                    ListTile(
+                    const SizedBox(height: 16),
+                    _buildProfileOption(
+                      icon: Icons.logout,
+                      text: 'Logout',
                       onTap: _logout,
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.grey[100],
-                        child: const Icon(Icons.logout, color: Colors.black),
-                      ),
-                      title: const Text('Logout'),
+                      isDanger: true,
                     ),
                   ],
                 ),
+              ),
+      ),
+      bottomNavigationBar: CustomBottomNavBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
+      ),
+    );
+  }
+
+  Widget _buildProfileOption({
+    required IconData icon,
+    required String text,
+    required VoidCallback onTap,
+    bool isDanger = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6,
+              offset: Offset(0, 2),
+            )
+          ],
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 22,
+              backgroundColor: isDanger ? Colors.red[50] : Colors.deepPurple[50],
+              child: Icon(
+                icon,
+                color: isDanger ? Colors.red : Colors.deepPurple,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Text(
+              text,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: isDanger ? Colors.red : Colors.black87,
+              ),
+            ),
+            const Spacer(),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+          ],
         ),
       ),
     );
