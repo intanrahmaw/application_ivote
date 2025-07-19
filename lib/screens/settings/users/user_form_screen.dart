@@ -14,14 +14,15 @@ class UserFormScreen extends StatefulWidget {
 
 class _UserFormScreenState extends State<UserFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _namaController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _noHpController = TextEditingController();
-  final _alamatController = TextEditingController();
-  final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _newPasswordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+
+  final TextEditingController _namaController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _noHpController = TextEditingController();
+  final TextEditingController _alamatController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   bool _isLoading = false;
 
@@ -39,13 +40,12 @@ class _UserFormScreenState extends State<UserFormScreen> {
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
+
     final service = SupabaseService();
+    final isEdit = widget.user != null;
 
     try {
-      final isEdit = widget.user != null;
-
       if (isEdit &&
           _newPasswordController.text.isNotEmpty &&
           _newPasswordController.text != _confirmPasswordController.text) {
@@ -55,16 +55,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
         return;
       }
 
-      if (!isEdit) {
-        await service.addUser(
-          username: _usernameController.text,
-          password: _passwordController.text,
-          nama: _namaController.text,
-          email: _emailController.text,
-          alamat: _alamatController.text,
-          noHp: '+62${_noHpController.text}',
-        );
-      } else {
+      if (isEdit) {
         await service.updateUser(
           userId: widget.user!.userId,
           nama: _namaController.text,
@@ -73,11 +64,20 @@ class _UserFormScreenState extends State<UserFormScreen> {
           noHp: '+62${_noHpController.text}',
           password: _newPasswordController.text.isNotEmpty ? _newPasswordController.text : null,
         );
+      } else {
+        await service.addUser(
+          username: _usernameController.text,
+          password: _passwordController.text,
+          nama: _namaController.text,
+          email: _emailController.text,
+          alamat: _alamatController.text,
+          noHp: '+62${_noHpController.text}',
+        );
       }
 
       Get.snackbar(
         'Sukses',
-        widget.user == null ? 'User berhasil ditambahkan' : 'User berhasil diperbarui',
+        isEdit ? 'User berhasil diperbarui' : 'User berhasil ditambahkan',
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
@@ -96,6 +96,9 @@ class _UserFormScreenState extends State<UserFormScreen> {
       {bool obscure = false,
       TextInputType keyboardType = TextInputType.text,
       String? Function(String?)? validator}) {
+    final isPasswordBaru = hint.toLowerCase().contains('password baru');
+    final isEdit = widget.user != null;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
@@ -103,8 +106,16 @@ class _UserFormScreenState extends State<UserFormScreen> {
         obscureText: obscure,
         keyboardType: keyboardType,
         validator: validator ??
-            (value) =>
-                (value == null || value.isEmpty) ? '$hint tidak boleh kosong' : null,
+            (value) {
+              // Validator khusus untuk password baru saat edit
+              if (isEdit && isPasswordBaru) {
+                return null; // password baru opsional
+              }
+              if (value == null || value.isEmpty) {
+                return '$hint tidak boleh kosong';
+              }
+              return null;
+            },
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: const TextStyle(color: Colors.grey),
@@ -165,16 +176,14 @@ class _UserFormScreenState extends State<UserFormScreen> {
               decoration: InputDecoration(
                 filled: true,
                 fillColor: const Color(0xFFF0F0F0),
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide:
-                      const BorderSide(color: Colors.deepPurple, width: 2),
+                  borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
                 ),
                 errorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -220,17 +229,17 @@ class _UserFormScreenState extends State<UserFormScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    'Form User',
-                    style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87),
+                  Text(
+                    isEdit ? 'Form Edit User' : 'Form Input User',
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   _buildInputField('Nama', _namaController),
-                  _buildInputField('Email', _emailController,
-                      keyboardType: TextInputType.emailAddress),
+                  _buildInputField('Email', _emailController, keyboardType: TextInputType.emailAddress),
                   _buildPhoneInput(),
                   _buildInputField('Alamat', _alamatController),
                   _buildInputField('Username', _usernameController),
@@ -239,11 +248,9 @@ class _UserFormScreenState extends State<UserFormScreen> {
                   if (isEdit) ...[
                     const SizedBox(height: 8),
                     const Text('Ubah Password (Opsional)',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16)),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     _buildInputField('Password Baru', _newPasswordController, obscure: true),
-                    _buildInputField('Ulangi Password Baru', _confirmPasswordController,
-                        obscure: true),
+                    _buildInputField('Ulangi Password Baru', _confirmPasswordController, obscure: true),
                   ],
                   const SizedBox(height: 30),
                   Row(
@@ -255,8 +262,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                             foregroundColor: Colors.deepPurple,
                             side: const BorderSide(color: Colors.deepPurple),
                             minimumSize: const Size.fromHeight(50),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                           child: const Text('Kembali'),
                         ),
@@ -268,22 +274,18 @@ class _UserFormScreenState extends State<UserFormScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.deepPurple,
                             minimumSize: const Size.fromHeight(50),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                           child: _isLoading
                               ? const SizedBox(
                                   height: 24,
                                   width: 24,
-                                  child: CircularProgressIndicator(
-                                      color: Colors.white, strokeWidth: 2),
+                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                                 )
                               : Text(
                                   isEdit ? 'Update' : 'Simpan',
                                   style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white),
+                                      fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                                 ),
                         ),
                       ),
