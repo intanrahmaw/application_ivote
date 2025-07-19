@@ -36,7 +36,7 @@ class _BouncyMenuContentState extends State<_BouncyMenuContent>
     {
       'icon': Icons.person,
       'label': 'Manajemen User',
-      'subtitle': 'Kelola akun dan akses pengguna',
+      'subtitle': 'Kelola akun pengguna',
       'route': '/user'
     },
     {
