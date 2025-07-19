@@ -15,71 +15,74 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   bool _obscurePassword = true;
   bool _isLoading = false;
 
   Future<void> _signIn() async {
-    final username = _usernameController.text.trim();
-    final password = _passwordController.text.trim();
+    var username = _usernameController.text;
+    var password = _passwordController.text;
 
-    if (username.isEmpty || password.isEmpty) {
+    if (username == '' || password == '') {
       Get.snackbar('Peringatan', 'Username dan password tidak boleh kosong',
           backgroundColor: Colors.orange, colorText: Colors.white);
       return;
     }
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
-      // Cek apakah data cocok di tabel admin
-      final adminResponse = await supabase
+      // Coba login admin dulu
+      var admin = await supabase
           .from('admin')
           .select('admin_id, nama')
           .eq('username', username)
           .eq('password', password)
           .maybeSingle();
 
-      if (adminResponse != null) {
-        final namaAdmin = adminResponse['nama'] ?? 'Admin';
-        loggedInUserName = namaAdmin;
+      if (admin != null) {
+        loggedInUserName = admin['nama'];
         loggedInUserRole = 'admin';
 
-        Get.snackbar('Login Berhasil', 'Selamat datang, $namaAdmin!',
+        Get.snackbar('Login Berhasil', 'Selamat datang, ${admin['nama']}!',
             backgroundColor: Colors.green, colorText: Colors.white);
-        Get.offAll(() => const DashboardScreen());
+        Get.offAll(() => DashboardScreen());
         return;
       }
 
-      // Jika bukan admin, coba cek tabel users
-      final userResponse = await supabase
+      // kalau bukan admin, cek user biasa
+      var user = await supabase
           .from('users')
           .select('user_id, nama')
           .eq('username', username)
           .eq('password', password)
           .maybeSingle();
 
-      if (userResponse == null) {
+      if (user == null) {
         Get.snackbar('Login Gagal', 'Username atau password salah',
             backgroundColor: Colors.red, colorText: Colors.white);
         return;
       }
 
-      final namaUser = userResponse['nama'] ?? 'Pengguna';
-      loggedInUserName = namaUser;
+      loggedInUserName = user['nama'];
       loggedInUserRole = 'user';
-      loggedInUserId = userResponse['user_id'];
+      loggedInUserId = user['user_id'];
 
-      Get.snackbar('Berhasil Login', 'Selamat datang, $namaUser!',
+      Get.snackbar('Berhasil Login', 'Selamat datang, ${user['nama']}!',
           backgroundColor: Colors.green, colorText: Colors.white);
 
-      Get.offAll(() => const DashboardScreen());
+      Get.offAll(() => DashboardScreen());
     } catch (e) {
       Get.snackbar('Error', 'Terjadi kesalahan saat login: $e',
           backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -92,27 +95,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final screenHeight = mediaQuery.size.height;
-    final screenWidth = mediaQuery.size.width;
+    var tinggi = MediaQuery.of(context).size.height;
+    var lebar = MediaQuery.of(context).size.width;
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: LayoutBuilder(
-          builder: (context, constraints) {
+          builder: (context, box) {
             return SingleChildScrollView(
               child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                constraints: BoxConstraints(minHeight: box.maxHeight),
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
+                  padding: EdgeInsets.symmetric(horizontal: lebar * 0.08),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(height: screenHeight * 0.04),
-                      Image.asset('assets/Image/logo.png', height: screenHeight * 0.3),
-                      SizedBox(height: screenHeight * 0.02),
-                      const Text(
+                      SizedBox(height: tinggi * 0.04),
+                      Image.asset('assets/Image/logo.png', height: tinggi * 0.3),
+                      SizedBox(height: tinggi * 0.02),
+                      Text(
                         'WELCOME TO IVOTE',
                         style: TextStyle(
                           fontSize: 18,
@@ -120,12 +122,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           letterSpacing: 1.2,
                         ),
                       ),
-                      SizedBox(height: screenHeight * 0.04),
+                      SizedBox(height: tinggi * 0.04),
                       TextField(
                         controller: _usernameController,
                         decoration: InputDecoration(
                           labelText: 'Username',
-                          prefixIcon: const Icon(Icons.person),
+                          prefixIcon: Icon(Icons.person),
                           filled: true,
                           fillColor: Colors.grey[200],
                           border: OutlineInputBorder(
@@ -133,19 +135,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       TextField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          prefixIcon: const Icon(Icons.lock),
+                          prefixIcon: Icon(Icons.lock),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                            ),
+                                _obscurePassword ? Icons.visibility_off : Icons.visibility),
                             onPressed: () {
-                              setState(() => _obscurePassword = !_obscurePassword);
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
                             },
                           ),
                           filled: true,
@@ -155,9 +158,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(height: screenHeight * 0.05),
+                      SizedBox(height: tinggi * 0.05),
                       _isLoading
-                          ? const CircularProgressIndicator(color: Colors.deepPurple)
+                          ? CircularProgressIndicator(color: Colors.deepPurple)
                           : SizedBox(
                               width: double.infinity,
                               height: 50,
@@ -169,29 +172,30 @@ class _LoginScreenState extends State<LoginScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'LOGIN',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
-                                    letterSpacing: 1,
                                   ),
                                 ),
                               ),
                             ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
                         height: 50,
                         child: OutlinedButton(
-                          onPressed: () => Get.to(() => const RegisterScreen()),
+                          onPressed: () {
+                            Get.to(() => RegisterScreen());
+                          },
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.deepPurple),
+                            side: BorderSide(color: Colors.deepPurple),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Create Account',
                             style: TextStyle(
                               color: Colors.deepPurple,
@@ -200,7 +204,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(height: screenHeight * 0.04),
+                      SizedBox(height: tinggi * 0.04),
                     ],
                   ),
                 ),

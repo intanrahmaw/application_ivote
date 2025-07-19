@@ -1,3 +1,4 @@
+// Tetap sama bagian import-nya
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -15,13 +16,14 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final _namaController = TextEditingController();
-  final _usernameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _alamatController = TextEditingController();
-  final _teleponController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _ulangPasswordController = TextEditingController();
+  // ✅ Gunakan final dan penamaan yang konsisten
+  final TextEditingController _namaController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _alamatController = TextEditingController();
+  final TextEditingController _teleponController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _ulangPasswordController = TextEditingController();
 
   bool _isLoading = false;
 
