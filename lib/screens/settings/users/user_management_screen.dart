@@ -130,7 +130,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
           Get.offAllNamed('/dashboard');
           return;
         case 1:
-          DashboardAdminMenu.show(context); // submenu setting
+          SubMenuAdmin.show(context); // submenu setting
           return;
         case 2:
           Get.offAllNamed('/result');

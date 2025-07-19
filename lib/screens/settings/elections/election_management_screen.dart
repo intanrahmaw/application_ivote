@@ -140,7 +140,7 @@ class _ElectionManagementScreenState extends State<ElectionManagementScreen> {
           Get.offAllNamed('/dashboard');
           return;
         case 1:
-          DashboardAdminMenu.show(context); // submenu setting
+          SubMenuAdmin.show(context); // submenu setting
           return;
         case 2:
           Get.offAllNamed('/result');

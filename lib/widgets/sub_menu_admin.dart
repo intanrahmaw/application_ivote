@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class DashboardAdminMenu {
+class SubMenuAdmin {
   static void show(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -33,15 +33,29 @@ class _BouncyMenuContentState extends State<_BouncyMenuContent>
   late final List<Animation<double>> _animations;
 
   final List<Map<String, dynamic>> _menuItems = [
-    {'icon': Icons.person, 'label': 'User', 'route': '/user'},
-    {'icon': Icons.group, 'label': 'Kandidat', 'route': '/candidate'},
-    {'icon': Icons.how_to_vote, 'label': 'Election', 'route': '/election'},
+    {
+      'icon': Icons.person,
+      'label': 'Manajemen User',
+      'subtitle': 'Kelola akun dan akses pengguna',
+      'route': '/user'
+    },
+    {
+      'icon': Icons.group,
+      'label': 'Manajemen Kandidat',
+      'subtitle': 'Atur kandidat pemilu',
+      'route': '/candidate'
+    },
+    {
+      'icon': Icons.how_to_vote,
+      'label': 'Manajemen Pemilu',
+      'subtitle': 'Kelola jadwal dan pengaturan',
+      'route': '/election'
+    },
   ];
 
   @override
   void initState() {
     super.initState();
-
     _controllers = List.generate(
       _menuItems.length,
       (index) => AnimationController(
@@ -83,35 +97,70 @@ class _BouncyMenuContentState extends State<_BouncyMenuContent>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
+          // Handle Bar
           Container(
-            height: 4,
+            height: 5,
             width: 40,
-            margin: const EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
               color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
+          const SizedBox(height: 16),
+          // Menu items
           ...List.generate(_menuItems.length, (index) {
             final item = _menuItems[index];
             return ScaleTransition(
               scale: _animations[index],
-              child: ListTile(
-                leading: Icon(item['icon'], color: Colors.deepPurple),
-                title: Text(
-                  item['label'],
-                  style: const TextStyle(fontWeight: FontWeight.w500),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  Get.toNamed(item['route']);
-                },
-                shape: RoundedRectangleBorder(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: Material(
+                  color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(12),
+                  elevation: 1,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Get.toNamed(item['route']);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      child: Row(
+                        children: [
+                          Icon(item['icon'], color: Colors.deepPurple, size: 28),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item['label'],
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  item['subtitle'],
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.chevron_right,
+                              color: Colors.grey, size: 24),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-                hoverColor: Colors.deepPurple.withOpacity(0.05),
-                splashColor: Colors.deepPurple.withOpacity(0.1),
               ),
             );
           }),

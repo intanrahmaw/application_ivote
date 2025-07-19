@@ -117,7 +117,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Get.offAllNamed('/dashboard');
           break;
         case 1:
-          DashboardAdminMenu.show(context);
+          SubMenuAdmin.show(context);
           break;
         case 2:
           Get.offAllNamed('/result');

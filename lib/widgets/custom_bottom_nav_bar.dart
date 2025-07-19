@@ -14,8 +14,7 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Definisikan item navigasi berdasarkan peran pengguna (role)
-    // Desain di Figma paling cocok dengan tampilan admin
+    // Daftar item navigasi disesuaikan dengan peran user (admin atau user biasa)
     List<_NavItem> navItems = [];
 
     if (loggedInUserRole == 'admin') {
@@ -42,7 +41,6 @@ class CustomBottomNavBar extends StatelessWidget {
         ),
       ];
     } else {
-      // Tampilan untuk 'user' biasa, bisa disesuaikan juga
       navItems = [
         _NavItem(
           activeIcon: Icons.home,
@@ -76,7 +74,7 @@ class CustomBottomNavBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.deepPurple.withOpacity(0.1),
               blurRadius: 20,
               offset: const Offset(0, 5),
             ),
@@ -87,12 +85,11 @@ class CustomBottomNavBar extends StatelessWidget {
           children: List.generate(navItems.length, (index) {
             final navItem = navItems[index];
             final isSelected = index == selectedIndex;
-            final color = isSelected ? Colors.black : Colors.grey.shade500;
+            final color = isSelected ? Colors.deepPurple : Colors.grey.shade500;
 
             return Expanded(
               child: GestureDetector(
                 onTap: () => onItemTapped(index),
-                // Membuat area tap transparan
                 behavior: HitTestBehavior.translucent,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -107,8 +104,7 @@ class CustomBottomNavBar extends StatelessWidget {
                       navItem.label,
                       style: TextStyle(
                         fontSize: 12,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                         color: color,
                       ),
                     ),
@@ -123,7 +119,7 @@ class CustomBottomNavBar extends StatelessWidget {
   }
 }
 
-// Modifikasi class _NavItem untuk menampung dua jenis ikon
+// Class untuk menyimpan data setiap item navigasi (ikon aktif, tidak aktif, dan label)
 class _NavItem {
   final IconData activeIcon;
   final IconData inactiveIcon;

@@ -82,7 +82,7 @@ class _VoteResultScreenState extends State<VoteResultScreen> {
           Get.offAllNamed('/dashboard');
           break;
         case 1:
-          DashboardAdminMenu.show(context);
+          SubMenuAdmin.show(context);
           break;
         case 2:
           Get.offAllNamed('/result');
