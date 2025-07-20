@@ -62,6 +62,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
           email: _emailController.text,
           alamat: _alamatController.text,
           noHp: '+62${_noHpController.text}',
+          username: _usernameController.text,
           password: _newPasswordController.text.isNotEmpty ? _newPasswordController.text : null,
         );
       } else {

@@ -103,7 +103,7 @@ class _ElectionManagementScreenState extends State<ElectionManagementScreen> {
         foregroundColor: Colors.black,
         elevation: 1,
         title: const Text(
-          'Manajemen Election',
+          'Manajemen Pemilu',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 20,
@@ -170,7 +170,18 @@ class _ElectionManagementScreenState extends State<ElectionManagementScreen> {
                                 padding: const EdgeInsets.all(8),
                                 child: ElectionListTable(
                                   elections: _electionList,
-                                  onEdit: (election) => _navigateAndRefresh(election: election),
+                                  onEdit: (election) {
+                                    if (!election.isActive) {
+                                      Get.snackbar(
+                                        'Tidak Bisa Diedit',
+                                        'Pemilu Sudah Selesai.',
+                                        backgroundColor: Colors.red,
+                                        colorText: Colors.white,
+                                      );
+                                    } else {
+                                      _navigateAndRefresh(election: election);
+                                    }
+                                  },
                                   // onDelete dihapus
                                 ),
                               ),

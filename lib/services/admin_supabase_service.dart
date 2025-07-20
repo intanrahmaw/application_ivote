@@ -13,7 +13,7 @@ final supabase = Supabase.instance.client;
 /// Ambil data admin berdasarkan username
 Future<Admin?> getAdminByUsername(String username) async {
   final response = await supabase
-      .from('admins') // pastikan nama tabel sudah benar di Supabase
+      .from('admin') // pastikan nama tabel sudah benar di Supabase
       .select()
       .eq('username', username)
       .maybeSingle();
@@ -39,7 +39,7 @@ Future<void> updateAdmin({
   };
 
   final response = await supabase
-      .from('admins')
+      .from('admin')
       .update(updates)
       .eq('admin_id', adminId)
       .select();

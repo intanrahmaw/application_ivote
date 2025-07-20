@@ -15,22 +15,36 @@ class DetailCandidateScreen extends StatelessWidget {
     String misi = candidate['misi'] ?? 'Misi kandidat belum diatur.';
 
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false, // Menghilangkan tombol back
+        title: const Text('Detail Kandidat'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        centerTitle: false, // <== Judul di kiri
+        elevation: 1,
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // FOTO KOTAK BESAR DI ATAS
-            Container(
-              width: double.infinity,
-              height: 250,
-              color: Colors.grey[200],
-              child: (imageUrl != null && imageUrl.isNotEmpty)
-                  ? Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                    )
-                  : const Center(
-                      child: Icon(Icons.person, size: 100, color: Colors.grey),
-                    ),
+            // FOTO KANDIDAT
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
+              ),
+              child: Container(
+                width: double.infinity,
+                height: 250,
+                color: Colors.grey[200],
+                child: (imageUrl != null && imageUrl.isNotEmpty)
+                    ? Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                      )
+                    : const Center(
+                        child: Icon(Icons.person, size: 100, color: Colors.grey),
+                      ),
+              ),
             ),
 
             const SizedBox(height: 20),

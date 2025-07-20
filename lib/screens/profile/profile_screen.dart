@@ -35,20 +35,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final table = (loggedInUserRole.toLowerCase() == 'admin') ? 'admin' : 'users';
+      final field = (loggedInUserRole.toLowerCase() == 'admin') ? 'username' : 'username';
+
       final data = await supabase
           .from(table)
           .select()
-          .ilike('username', loggedInUserName.trim())
+          .eq(field, loggedInUserName.trim())
           .maybeSingle();
 
       if (!mounted) return;
 
       setState(() {
-        displayName = data?['username'] ?? 'Pengguna';
+        displayName = data?['nama'] ?? 'Pengguna';
         avatarUrl = data?['avatar_url'] ?? '';
         isLoading = false;
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       setState(() {
         displayName = 'Gagal Ambil Nama';

@@ -45,6 +45,7 @@ class SupabaseService {
     required String email,
     required String alamat,
     required String noHp,
+    required String username,
     String? password, // Opsional jika ingin ubah password
   }) async {
     final updateData = {
@@ -52,6 +53,7 @@ class SupabaseService {
       'email': email,
       'alamat': alamat,
       'no_hp': noHp,
+      'username': username,
     };
 
     // Jika password diisi, tambahkan ke data update
