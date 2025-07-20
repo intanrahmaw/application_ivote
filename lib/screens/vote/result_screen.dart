@@ -160,7 +160,7 @@ class _VoteResultScreenState extends State<VoteResultScreen> {
       itemBuilder: (context, index) {
         if (index == 0) {
           return const Padding(
-            padding: EdgeInsets.only(bottom: 12),
+            padding: EdgeInsets.only(bottom: 5),
            
           );
         }
