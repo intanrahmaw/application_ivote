@@ -140,16 +140,30 @@ class _VoteResultScreenState extends State<VoteResultScreen> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: results.length + 1,
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+      itemCount: results.length + 2,
       itemBuilder: (context, index) {
         if (index == 0) {
+          return const Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: Text(
+              "Hasil Vote",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          );
+        }
+        if (index == 1) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
             child: _buildTotalVotesCard(),
           );
         }
-        final resultIndex = index - 1;
+
+        final resultIndex = index - 2;
         return _buildResultCard(results[resultIndex], resultIndex);
       },
     );

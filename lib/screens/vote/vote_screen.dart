@@ -154,8 +154,19 @@ class _VoteScreenState extends State<VoteScreen> {
     if (candidates.isEmpty) return _buildEmptyState();
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       children: [
+        const Padding(
+          padding: EdgeInsets.only(bottom: 12),
+          child: Text(
+            "Daftar Kandidat",
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        ),
         ...candidates.map((candidate) => _buildCandidateCard(candidate)).toList(),
       ],
     );
