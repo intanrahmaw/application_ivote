@@ -9,38 +9,37 @@ class SupabaseService {
   // CANDIDATE SERVICE
   // ==========================
 
-  // Ambil semua kandidat
+  /// Ambil semua kandidat dari election yang masih aktif dan belum berakhir
   Future<List<Map<String, dynamic>>> getCandidates() async {
     final now = DateTime.now().toIso8601String();
 
     final response = await supabase
         .from('candidates')
-        .select('*, elections!inner(*)') // join hanya kalau cocok
+        .select('*, elections!inner(*)') // Join dengan tabel elections
         .eq('elections.is_active', true)
-        .gte('elections.end_time', now); // hanya election yang belum selesai
+        .gte('elections.end_time', now); // Hanya election yang belum berakhir
 
     return List<Map<String, dynamic>>.from(response);
   }
 
+  /// Hapus semua vote berdasarkan ID kandidat
   Future<void> deleteVotesByCandidate(String candidateId) async {
-  await supabase
-      .from('votes')
-      .delete()
-      .eq('candidate_id', candidateId);
-}
+    await supabase
+        .from('votes')
+        .delete()
+        .eq('candidate_id', candidateId);
+  }
 
-Future<void> deleteCandidate(String candidateId) async {
-  // Hapus semua suara terlebih dahulu
-  await deleteVotesByCandidate(candidateId);
+  /// Hapus kandidat beserta semua vote-nya
+  Future<void> deleteCandidate(String candidateId) async {
+    await deleteVotesByCandidate(candidateId); // Hapus votes dulu
+    await supabase
+        .from('candidates')
+        .delete()
+        .eq('candidate_id', candidateId); // Lalu hapus kandidat
+  }
 
-  // Lalu hapus kandidat
-  await supabase
-      .from('candidates')
-      .delete()
-      .eq('candidate_id', candidateId);
-}
-
-  // Tambah kandidat baru
+  /// Tambah kandidat baru
   Future<void> addCandidate({
     required String electionId,
     required String nama,
@@ -48,7 +47,7 @@ Future<void> deleteCandidate(String candidateId) async {
     required String label,
     required String visi,
     required String misi,
-    String? imageUrl
+    String? imageUrl,
   }) async {
     await supabase.from('candidates').insert({
       'elections_id': electionId,
@@ -61,7 +60,7 @@ Future<void> deleteCandidate(String candidateId) async {
     });
   }
 
-  // Update kandidat berdasarkan ID
+  /// Update data kandidat
   Future<void> updateCandidate({
     required String candidateId,
     required String electionId,
@@ -94,9 +93,10 @@ Future<void> deleteCandidate(String candidateId) async {
     }
   }
 
-  // Upload gambar dari File (Android/iOS/Desktop)
+  /// Upload gambar dari File (Android/iOS/Desktop)
   Future<String> uploadImage(File file, String bucket, String path) async {
     final fileBytes = await file.readAsBytes();
+
     final response = await supabase.storage.from(bucket).uploadBinary(
       path,
       fileBytes,
@@ -110,7 +110,7 @@ Future<void> deleteCandidate(String candidateId) async {
     return supabase.storage.from(bucket).getPublicUrl(path);
   }
 
-  // Upload gambar dari bytes (Web)
+  /// Upload gambar dari bytes (Web)
   Future<String> uploadImageBytes(
     Uint8List bytes,
     String bucketName,

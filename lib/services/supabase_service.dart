@@ -8,18 +8,18 @@ class SupabaseService {
   // USER SERVICE
   // ==========================
 
-  // Ambil semua user
+  /// Ambil semua user
   Future<List<Map<String, dynamic>>> getUsers() async {
     final response = await supabase.from('users').select();
     return response;
   }
 
-  // Hapus user
+  /// Hapus user berdasarkan user_id
   Future<void> deleteUser(String userId) async {
     await supabase.from('users').delete().eq('user_id', userId);
   }
 
-  // Tambah user baru
+  /// Tambah user baru
   Future<void> addUser({
     required String username,
     required String password,
@@ -30,7 +30,7 @@ class SupabaseService {
   }) async {
     await supabase.from('users').insert({
       'username': username,
-      'password': password, // ⚠️ Password sebaiknya di-hash
+      'password': password,
       'nama': nama,
       'email': email,
       'alamat': alamat,
@@ -38,7 +38,7 @@ class SupabaseService {
     });
   }
 
-  // Update user (opsional ubah password)
+  /// Update user berdasarkan user_id
   Future<void> updateUser({
     required String userId,
     required String nama,
@@ -58,7 +58,7 @@ class SupabaseService {
 
     // Jika password diisi, tambahkan ke data update
     if (password != null && password.isNotEmpty) {
-      updateData['password'] = password; // ⚠️ Tetap sebaiknya di-hash
+      updateData['password'] = password;
     }
 
     await supabase.from('users').update(updateData).eq('user_id', userId);
@@ -69,7 +69,7 @@ class SupabaseService {
 // VOTING SERVICE
 // ==========================
 
-// Tambahkan vote
+/// Tambahkan vote (jika user belum pernah vote)
 Future<void> addVote({
   required String userId,
   required String candidateId,
@@ -79,7 +79,7 @@ Future<void> addVote({
       .from('votes')
       .select()
       .eq('user_id', userId)
-      .maybeSingle(); // Ambil satu data, atau null jika belum ada
+      .maybeSingle();
 
   if (existingVote != null) {
     throw Exception("Anda sudah melakukan vote.");
@@ -90,7 +90,3 @@ Future<void> addVote({
     'candidate_id': candidateId,
   });
 }
-
-// Ambil total suara per kand
-
-

@@ -6,8 +6,10 @@ class SupabaseService {
   // ELECTION SERVICE
   // ==========================
 
+  /// Ambil semua data election
   Future<List<Map<String, dynamic>>> getElections() async {
     final response = await supabase.from('elections').select();
+
     if (response is List) {
       return response.cast<Map<String, dynamic>>();
     } else {
@@ -15,6 +17,7 @@ class SupabaseService {
     }
   }
 
+  /// Tambah election baru
   Future<void> addElection({
     required String judul,
     required String deskripsi,
@@ -31,6 +34,7 @@ class SupabaseService {
     });
   }
 
+  /// Update data election berdasarkan ID
   Future<void> updateElection({
     required String electionId,
     required String judul,
@@ -58,6 +62,7 @@ class SupabaseService {
     }
   }
 
+  /// Update status aktif/tidak aktif pada election
   Future<void> updateElectionStatus(String electionId, bool isActive) async {
     final response = await supabase
         .from('elections')
@@ -65,7 +70,7 @@ class SupabaseService {
         .eq('elections_id', electionId);
 
     if (response == null) {
-      throw Exception('Gagal update status.');
+      throw Exception('Gagal update status election.');
     }
   }
 }
