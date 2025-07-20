@@ -33,8 +33,12 @@ class Users {
       alamat: json['alamat'] ?? '',
       noHp: json['no_hp'] ?? '',
       avatarUrl: json['avatar_url'] ?? '',
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+        createdAt: json['created_at'] != null
+        ? DateTime.parse(json['created_at'])
+        : DateTime.now(), // fallback
+    updatedAt: json['updated_at'] != null
+        ? DateTime.parse(json['updated_at'])
+        : DateTime.now(),
     );
   }
 

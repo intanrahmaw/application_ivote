@@ -39,13 +39,14 @@ class _LoginScreenState extends State<LoginScreen> {
       // Coba login admin dulu
       var admin = await supabase
           .from('admin')
-          .select('admin_id, nama')
+          .select('admin_id, nama, username')
           .eq('username', username)
           .eq('password', password)
           .maybeSingle();
 
       if (admin != null) {
-        loggedInUserName = admin['nama'];
+        loggedInUserId = admin['admin_id'];
+        loggedInUserName = admin['username'];
         loggedInUserRole = 'admin';
 
         Get.snackbar('Login Berhasil', 'Selamat datang, ${admin['nama']}!',

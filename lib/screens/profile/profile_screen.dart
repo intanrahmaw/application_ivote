@@ -1,11 +1,14 @@
+import 'package:application_ivote/models/admin_model.dart';
+import 'package:application_ivote/models/users_model.dart';
+import 'package:application_ivote/screens/profile/edit_user_acount.dart';
+import 'package:application_ivote/screens/profile/edit_account_screen.dart';
+import 'package:application_ivote/screens/auth/login_screen.dart';
+import 'package:application_ivote/utils/global_user.dart';
+import 'package:application_ivote/widgets/custom_bottom_nav_bar.dart';
+import 'package:application_ivote/widgets/sub_menu_admin.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:application_ivote/screens/auth/login_screen.dart';
-import 'package:application_ivote/screens/profile/edit_account_screen.dart';
-import 'package:application_ivote/utils/global_user.dart';
-import 'package:application_ivote/widgets/sub_menu_admin.dart';
-import 'package:application_ivote/widgets/custom_bottom_nav_bar.dart'; // ← Tambahkan ini
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -16,40 +19,70 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final supabase = Supabase.instance.client;
+
+  Users? currentUser;
+  Admin? currentAdmin;
   String displayName = 'Loading...';
   String? avatarUrl;
   bool isLoading = true;
-  int _selectedIndex = 3; // ← Profil tab index
+  int _selectedIndex = 3;
 
   @override
   void initState() {
+    print('➡️ Masuk ke ProfileScreen');
     super.initState();
-    _loadUserProfile();
+    _loadUser();
   }
 
-  Future<void> _loadUserProfile() async {
-    if (loggedInUserName.isEmpty || loggedInUserRole.isEmpty) {
-      Get.offAll(() => const LoginScreen());
+  Future<void> _loadUser() async {
+    print('🔍 loggedInUserId: $loggedInUserId');
+    print('🔍 loggedInUserRole: $loggedInUserRole');
+
+    if (loggedInUserId == null || loggedInUserId!.isEmpty) {
+      Future.microtask(() => Get.offAll(() => const LoginScreen()));
       return;
     }
 
     try {
-      final table = (loggedInUserRole.toLowerCase() == 'admin') ? 'admin' : 'users';
       final data = await supabase
-          .from(table)
+          .from(loggedInUserRole == 'admin' ? 'admin' : 'users')
           .select()
-          .ilike('username', loggedInUserName.trim())
+          .eq(loggedInUserRole == 'admin' ? 'admin_id' : 'user_id', loggedInUserId)
           .maybeSingle();
 
-      if (!mounted) return;
+      if (data == null) {
+        print("❌ Data user tidak ditemukan");
+        setState(() {
+          displayName = 'Data tidak ditemukan';
+          avatarUrl = null;
+          isLoading = false;
+        });
+        return;
+      }
 
       setState(() {
-        displayName = data?['username'] ?? 'Pengguna';
-        avatarUrl = data?['avatar_url'] ?? '';
+        displayName = data['nama'] ?? 'Pengguna';
+        avatarUrl = data['avatar_url'];
+        if (loggedInUserRole == 'user') {
+          currentUser = Users(
+            userId: data['user_id'],
+            username: data['username'],
+            nama: data['nama'],
+            email: data['email'],
+            alamat: data['alamat'],
+            noHp: data['no_hp'],
+            avatarUrl: data['avatar_url'],
+            password: data['password'], 
+            createdAt: DateTime.parse(data['created_at']), // ✅ FIXED
+            updatedAt: DateTime.parse(data['updated_at']),
+          );
+        } else {
+          currentAdmin = Admin.fromMap(data);
+        }
         isLoading = false;
       });
-    } catch (_) {
-      if (!mounted) return;
+    } catch (e) {
+      print("❌ Gagal ambil data profil: $e");
       setState(() {
         displayName = 'Gagal Ambil Nama';
         avatarUrl = null;
@@ -136,8 +169,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       icon: Icons.edit,
                       text: 'Edit Profil',
                       onTap: () async {
-                        await Get.to(() => const EditAccountScreen());
-                        _loadUserProfile();
+                        if (loggedInUserRole == 'admin') {
+                          if (currentAdmin != null) {
+                            await Get.to(() => EditAccountScreen(admin: currentAdmin!));
+                            _loadUser();
+                          }
+                        } else {
+                          if (currentUser != null) {
+                            await Get.to(() => EditUserAccountScreen(user: currentUser!));
+                            _loadUser();
+                          }
+                        }
                       },
                     ),
                     const SizedBox(height: 16),

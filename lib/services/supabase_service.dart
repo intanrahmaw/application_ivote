@@ -39,29 +39,33 @@ class SupabaseService {
   }
 
   // Update user (opsional ubah password)
-  Future<void> updateUser({
-    required String userId,
-    required String nama,
-    required String email,
-    required String alamat,
-    required String noHp,
-    String? password, // Opsional jika ingin ubah password
-  }) async {
-    final updateData = {
-      'nama': nama,
-      'email': email,
-      'alamat': alamat,
-      'no_hp': noHp,
-    };
+ Future<void> updateUser({
+  required String userId,
+  required String nama,
+  required String email,
+  required String alamat,
+  required String noHp,
+  String? password,
+  String? avatarUrl,
+}) async {
+  final updates = {
+    'nama': nama,
+    'email': email,
+    'alamat': alamat,
+    'no_hp': noHp,
+    'updated_at': DateTime.now().toIso8601String(),
+  };
 
-    // Jika password diisi, tambahkan ke data update
-    if (password != null && password.isNotEmpty) {
-      updateData['password'] = password; // ⚠️ Tetap sebaiknya di-hash
-    }
+  if (avatarUrl != null) updates['avatar_url'] = avatarUrl;
+  if (password != null && password.isNotEmpty) updates['password'] = password;
 
-    await supabase.from('users').update(updateData).eq('user_id', userId);
-  }
+  await Supabase.instance.client
+      .from('users')
+      .update(updates)
+      .eq('user_id', userId);
 }
+
+
 
 // ==========================
 // VOTING SERVICE
@@ -92,3 +96,4 @@ Future<void> addVote({
 // Ambil total suara per kand
 
 
+}

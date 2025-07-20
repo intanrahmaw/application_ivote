@@ -42,4 +42,15 @@ class Admin {
       'updated_at': updatedAt.toIso8601String(),
     };
   }
+  factory Admin.fromMap(Map<String, dynamic> map) {
+    return Admin(
+      adminId: map['admin_id'],
+      username: map['username'],
+      nama: map['nama'],
+      avatarUrl: map['avatar_url'],
+      password: map['password'],
+      createdAt: DateTime.parse(map['created_at']),
+      updatedAt: DateTime.parse(map['updated_at']),
+    );
+  }
 }
