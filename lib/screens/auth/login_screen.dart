@@ -22,10 +22,10 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
 
   Future<void> _signIn() async {
-    var username = _usernameController.text;
-    var password = _passwordController.text;
+    var username = _usernameController.text.trim();
+    var password = _passwordController.text.trim();
 
-    if (username == '' || password == '') {
+    if (username.isEmpty || password.isEmpty) {
       Get.snackbar('Peringatan', 'Username dan password tidak boleh kosong',
           backgroundColor: Colors.orange, colorText: Colors.white);
       return;
@@ -36,16 +36,17 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // Coba login admin dulu
+      // Coba login sebagai admin
       var admin = await supabase
           .from('admin')
-          .select('admin_id, nama')
+          .select('admin_id, nama, username')
           .eq('username', username)
           .eq('password', password)
           .maybeSingle();
 
       if (admin != null) {
-        loggedInUserName = admin['nama'];
+        loggedInUserName = admin['username'];
+        loggedInUserNama = admin['nama']; // simpan nama lengkap admin
         loggedInUserRole = 'admin';
 
         Get.snackbar('Login Berhasil', 'Selamat datang, ${admin['nama']}!',
@@ -54,10 +55,10 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      // kalau bukan admin, cek user biasa
+      // Jika bukan admin, cek user biasa
       var user = await supabase
           .from('users')
-          .select('user_id, nama')
+          .select('user_id, nama, username')
           .eq('username', username)
           .eq('password', password)
           .maybeSingle();
@@ -68,9 +69,10 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      loggedInUserName = user['nama'];
-      loggedInUserRole = 'user';
+      loggedInUserName = user['username'];
+      loggedInUserNama = user['nama']; // simpan nama lengkap user
       loggedInUserId = user['user_id'];
+      loggedInUserRole = 'user';
 
       Get.snackbar('Berhasil Login', 'Selamat datang, ${user['nama']}!',
           backgroundColor: Colors.green, colorText: Colors.white);

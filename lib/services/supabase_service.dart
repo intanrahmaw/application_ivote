@@ -22,7 +22,7 @@ class SupabaseService {
   /// Tambah user baru
   Future<void> addUser({
     required String username,
-    required String password,
+    required String password, 
     required String nama,
     required String email,
     required String alamat,

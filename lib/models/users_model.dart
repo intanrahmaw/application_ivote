@@ -6,7 +6,6 @@ class Users {
   final String email;
   final String alamat;
   final String noHp;
-  final String? avatarUrl;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -18,7 +17,6 @@ class Users {
     required this.email,
     required this.alamat,
     required this.noHp,
-    required this.avatarUrl,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -32,7 +30,6 @@ class Users {
       email: json['email'],
       alamat: json['alamat'] ?? '',
       noHp: json['no_hp'] ?? '',
-      avatarUrl: json['avatar_url'] ?? '',
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
     );
@@ -47,7 +44,6 @@ class Users {
       'email': email,
       'alamat': alamat,
       'no_hp': noHp,
-      'avatar_url': avatarUrl,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };

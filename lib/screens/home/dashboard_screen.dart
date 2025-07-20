@@ -173,8 +173,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         title: Text(
-          loggedInUserName.isNotEmpty
-              ? loggedInUserName.capitalizeFirst!
+          loggedInUserNama.isNotEmpty
+              ? loggedInUserNama.capitalizeFirst!
               : 'Pengguna',
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),

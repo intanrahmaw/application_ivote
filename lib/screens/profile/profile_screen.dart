@@ -5,7 +5,7 @@ import 'package:application_ivote/screens/auth/login_screen.dart';
 import 'package:application_ivote/screens/profile/edit_account_screen.dart';
 import 'package:application_ivote/utils/global_user.dart';
 import 'package:application_ivote/widgets/sub_menu_admin.dart';
-import 'package:application_ivote/widgets/custom_bottom_nav_bar.dart'; // ← Tambahkan ini
+import 'package:application_ivote/widgets/custom_bottom_nav_bar.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -17,9 +17,8 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final supabase = Supabase.instance.client;
   String displayName = 'Loading...';
-  String? avatarUrl;
   bool isLoading = true;
-  int _selectedIndex = 3; // ← Profil tab index
+  int _selectedIndex = 3;
 
   @override
   void initState() {
@@ -34,27 +33,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     try {
-      final table = (loggedInUserRole.toLowerCase() == 'admin') ? 'admin' : 'users';
-      final field = (loggedInUserRole.toLowerCase() == 'admin') ? 'username' : 'username';
+      final isAdmin = loggedInUserRole.toLowerCase() == 'admin';
+      final table = isAdmin ? 'admin' : 'users';
 
       final data = await supabase
           .from(table)
-          .select()
-          .eq(field, loggedInUserName.trim())
+          .select('nama') // hanya ambil nama
+          .eq('username', loggedInUserName.trim())
           .maybeSingle();
 
       if (!mounted) return;
 
-      setState(() {
-        displayName = data?['nama'] ?? 'Pengguna';
-        avatarUrl = data?['avatar_url'] ?? '';
-        isLoading = false;
-      });
+      if (data != null) {
+        setState(() {
+          displayName = data['nama'] ?? 'Pengguna';
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          displayName = 'Pengguna tidak ditemukan';
+          isLoading = false;
+        });
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
         displayName = 'Gagal Ambil Nama';
-        avatarUrl = null;
         isLoading = false;
       });
     }
@@ -114,15 +118,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 30),
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 50,
-                      backgroundImage: (avatarUrl != null && avatarUrl!.isNotEmpty)
-                          ? NetworkImage(avatarUrl!)
-                          : null,
-                      backgroundColor: Colors.grey[200],
-                      child: (avatarUrl == null || avatarUrl!.isEmpty)
-                          ? const Icon(Icons.person, size: 50, color: Colors.grey)
-                          : null,
+                      backgroundColor: Colors.grey,
+                      child: Icon(Icons.person, size: 50, color: Colors.white),
                     ),
                     const SizedBox(height: 15),
                     Text(
@@ -185,7 +184,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             CircleAvatar(
               radius: 22,
-              backgroundColor: isDanger ? Colors.red[50] : Colors.deepPurple[50],
+              backgroundColor:
+                  isDanger ? Colors.red[50] : Colors.deepPurple[50],
               child: Icon(
                 icon,
                 color: isDanger ? Colors.red : Colors.deepPurple,

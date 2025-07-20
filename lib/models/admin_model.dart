@@ -3,7 +3,6 @@ class Admin {
   final String username;
   final String password;
   final String nama;
-  final String? avatarUrl;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -12,7 +11,6 @@ class Admin {
     required this.username,
     required this.password,
     required this.nama,
-    required this.avatarUrl,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -23,7 +21,6 @@ class Admin {
       username: json['username'],
       password: json['password'],
       nama: json['nama'],
-      avatarUrl: json['avatar_url'] ?? '',
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
     );
@@ -35,7 +32,6 @@ class Admin {
       'username': username,
       'password': password,
       'nama': nama,
-      'avatar_url': avatarUrl,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };

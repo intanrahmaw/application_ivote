@@ -2,7 +2,7 @@
 
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/admin_model.dart'; // pastikan path sesuai dengan file kamu
+import '../models/admin_model.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -28,13 +28,11 @@ Future<void> updateAdmin({
   required String username,
   required String password,
   required String nama,
-  String? avatarUrl,
 }) async {
   final updates = {
     'username': username,
     'password': password,
     'nama': nama,
-    'avatar_url': avatarUrl,
     'updated_at': DateTime.now().toIso8601String(),
   };
 
