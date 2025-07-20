@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:application_ivote/screens/auth/login_screen.dart';
-import 'package:application_ivote/screens/profile/edit_account_screen.dart';
+import 'package:application_ivote/screens/profile/edit_user_screen.dart';
+import 'package:application_ivote/screens/profile/edit_admin_screen.dart';
 import 'package:application_ivote/utils/global_user.dart';
 import 'package:application_ivote/widgets/sub_menu_admin.dart';
 import 'package:application_ivote/widgets/custom_bottom_nav_bar.dart';
@@ -38,23 +39,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       final data = await supabase
           .from(table)
-          .select('nama') // hanya ambil nama
+          .select('nama')
           .eq('username', loggedInUserName.trim())
           .maybeSingle();
 
       if (!mounted) return;
 
-      if (data != null) {
-        setState(() {
-          displayName = data['nama'] ?? 'Pengguna';
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          displayName = 'Pengguna tidak ditemukan';
-          isLoading = false;
-        });
-      }
+      setState(() {
+        displayName = data != null ? data['nama'] ?? 'Pengguna' : 'Pengguna tidak ditemukan';
+        isLoading = false;
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -137,8 +131,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       icon: Icons.edit,
                       text: 'Edit Profil',
                       onTap: () async {
-                        await Get.to(() => const EditAccountScreen());
-                        _loadUserProfile();
+                        if (loggedInUserRole.toLowerCase() == 'admin') {
+                          await Get.to(() => const EditAdminAccountScreen());
+                        } else {
+                          await Get.to(() => const EditUserAccountScreen());
+                        }
+                        _loadUserProfile(); // reload nama setelah kembali
                       },
                     ),
                     const SizedBox(height: 16),
@@ -184,8 +182,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             CircleAvatar(
               radius: 22,
-              backgroundColor:
-                  isDanger ? Colors.red[50] : Colors.deepPurple[50],
+              backgroundColor: isDanger ? Colors.red[50] : Colors.deepPurple[50],
               child: Icon(
                 icon,
                 color: isDanger ? Colors.red : Colors.deepPurple,
