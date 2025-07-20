@@ -57,15 +57,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
     try {
       final response = await supabase
           .from('elections')
-          .select('end_time')
-          .order('end_time', ascending: false)
+          .select()
+          .order('created_at', ascending: false)
           .limit(1)
-          .single();
+          .maybeSingle();
 
-      if (mounted && response['end_time'] != null) {
+      if (response != null) {
+        final isActive = response['is_active'] ?? false;
+        final endTimeString = response['end_time'];
+
+        if (isActive && endTimeString != null) {
+          setState(() {
+            endTime = DateTime.parse(endTimeString);
+            _startCountdown();
+          });
+        } else {
+          // Tidak aktif = timer jadi nol
+          setState(() {
+            endTime = null;
+            remainingTime = Duration.zero;
+          });
+        }
+      } else {
+        // Tidak ada election
         setState(() {
-          endTime = DateTime.parse(response['end_time']);
-          _startCountdown();
+          endTime = null;
+          remainingTime = Duration.zero;
         });
       }
     } catch (e) {

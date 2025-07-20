@@ -1,5 +1,3 @@
-
-
 class Candidate {
   final String candidateId;
   final String electionId;
@@ -26,22 +24,21 @@ class Candidate {
   });
 
  factory Candidate.fromMap(Map<String, dynamic> map) {
-  return Candidate(    
-    candidateId: map['candidate_id']?.toString() ?? '',
-    electionId: map['elections_id']?.toString() ?? '',
-    nama: map['nama'] ?? '', 
-    organisasi: map['organisasi'] ?? '', 
-    label: map['label'] ?? '',    
-    visi: map['visi'] ?? '',
-    misi: map['misi'] ?? '',
-    imageUrl: map['image_url'],
-    created: map['created_at'] != null
-        ? DateTime.parse(map['created_at'])
-        : DateTime.now(),
-    updated: map['updated_at'] != null
-        ? DateTime.parse(map['updated_at'])
-        : DateTime.now(),
-  );
-}
-
+    return Candidate(    
+      candidateId: map['candidate_id']?.toString() ?? '',
+      electionId: map['elections_id']?.toString() ?? '',
+      nama: map['nama'] ?? '', 
+      organisasi: map['organisasi'] ?? '', 
+      label: map['label'] ?? '',    
+      visi: map['visi'] ?? '',
+      misi: map['misi'] ?? '',
+      imageUrl: map['image_url'],
+      created: map['created_at'] != null
+          ? DateTime.parse(map['created_at'])
+          : DateTime.now(),
+      updated: map['updated_at'] != null
+          ? DateTime.parse(map['updated_at'])
+          : DateTime.now(),
+    );
+  }
 }

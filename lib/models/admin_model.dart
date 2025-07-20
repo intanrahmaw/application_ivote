@@ -1,5 +1,3 @@
-// lib/models/admin_model.dart
-
 class Admin {
   final String adminId;
   final String username;

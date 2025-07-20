@@ -16,9 +16,8 @@ class VoteResultScreen extends StatefulWidget {
 
 class _VoteResultScreenState extends State<VoteResultScreen> {
   final int _selectedIndex = 2;
-
   bool isLoading = true;
-  List<Map<String, dynamic>> results = [];
+  List<Map<String, dynamic>> groupedResults = [];
   int totalVotes = 0;
 
   @override
@@ -34,36 +33,50 @@ class _VoteResultScreenState extends State<VoteResultScreen> {
           .select('*, elections!inner(is_active)')
           .eq('elections.is_active', true);
 
-      final votes = await supabase.from('votes').select();
-      final activeCandidateIds =
-          candidates.map((c) => c['candidate_id'].toString()).toList();
-
-      Map<String, int> voteCounts = {};
-      for (var vote in votes) {
-        String candidateId = vote['candidate_id'].toString();
-        if (activeCandidateIds.contains(candidateId)) {
-          voteCounts[candidateId] = (voteCounts[candidateId] ?? 0) + 1;
-        }
+      if (candidates.isEmpty) {
+        if (mounted) setState(() => isLoading = false);
+        return;
       }
 
-      int total = voteCounts.values.fold(0, (sum, count) => sum + count);
+      final candidateIds = candidates.map((c) => c['candidate_id']).toList();
 
-      List<Map<String, dynamic>> merged = candidates.map((candidate) {
-        final id = candidate['candidate_id'].toString();
-        final count = voteCounts[id] ?? 0;
-        return {
-          'nama': candidate['nama'],
-          'image_url': candidate['image_url'],
-          'vote_count': count,
-        };
-      }).toList();
+      final votes = await supabase
+          .from('votes')
+          .select()
+          .inFilter('candidate_id', candidateIds);
 
-      merged.sort((a, b) => b['vote_count'].compareTo(a['vote_count']));
+      // Hitung total suara untuk kandidat di election aktif saja
+      Map<String, int> voteCounts = {};
+      for (var vote in votes) {
+        final cid = vote['candidate_id'].toString();
+        voteCounts[cid] = (voteCounts[cid] ?? 0) + 1;
+      }
+
+      // Total semua suara dari election aktif
+      int allVotes = voteCounts.values.fold(0, (a, b) => a + b);
+      totalVotes = allVotes;
+
+      // Kelompokkan berdasarkan organisasi
+      Map<String, List<Map<String, dynamic>>> grouped = {};
+
+      for (var candidate in candidates) {
+        final org = candidate['organisasi'] ?? 'Lainnya';
+        final cid = candidate['candidate_id'].toString();
+        final count = voteCounts[cid] ?? 0;
+
+        candidate['vote_count'] = count;
+        grouped.putIfAbsent(org, () => []).add(candidate);
+      }
 
       if (mounted) {
         setState(() {
-          results = merged;
-          totalVotes = total;
+          groupedResults = grouped.entries.map((e) {
+          return {
+            'organisasi': e.key,
+            'candidates': e.value,
+            'total_votes': e.value.fold<int>(0, (sum, c) => sum + ((c['vote_count'] as int?) ?? 0)),
+          };
+        }).toList();
           isLoading = false;
         });
       }
@@ -118,7 +131,7 @@ class _VoteResultScreenState extends State<VoteResultScreen> {
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            fontFamily: 'Montserrat', 
+            fontFamily: 'Montserrat',
             letterSpacing: 1,
           ),
         ),
@@ -138,41 +151,18 @@ class _VoteResultScreenState extends State<VoteResultScreen> {
   }
 
   Widget _buildBody() {
-    if (results.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.bar_chart_outlined, size: 80, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              "Hasil Voting Belum Tersedia",
-              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-            ),
-          ],
-        ),
-      );
+    if (groupedResults.isEmpty) {
+      return const Center(child: Text("Belum ada hasil voting"));
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-      itemCount: results.length + 2,
+      padding: const EdgeInsets.all(16),
+      itemCount: groupedResults.length + 1,
       itemBuilder: (context, index) {
-        if (index == 0) {
-          return const Padding(
-            padding: EdgeInsets.only(bottom: 5),
-           
-          );
-        }
-        if (index == 1) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: _buildTotalVotesCard(),
-          );
-        }
+        if (index == 0) return _buildTotalVotesCard();
 
-        final resultIndex = index - 2;
-        return _buildResultCard(results[resultIndex], resultIndex);
+        final orgData = groupedResults[index - 1];
+        return _buildOrganizationSection(orgData);
       },
     );
   }
@@ -219,19 +209,46 @@ class _VoteResultScreenState extends State<VoteResultScreen> {
     );
   }
 
-  Widget _buildResultCard(Map<String, dynamic> item, int rank) {
+  Widget _buildOrganizationSection(Map<String, dynamic> orgData) {
+    final String org = orgData['organisasi'];
+    final List candidates = orgData['candidates'];
+    final int orgTotalVotes = orgData['total_votes'];
+
+    candidates.sort((a, b) => (b['vote_count'] as int).compareTo(a['vote_count'] as int));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Text(
+          org,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.deepPurple,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...List.generate(
+          candidates.length,
+          (i) => _buildResultCard(candidates[i], i, orgTotalVotes),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildResultCard(Map<String, dynamic> item, int rank, int orgTotalVotes) {
     final vote = item['vote_count'] as int;
-    final percent = totalVotes == 0 ? 0.0 : vote / totalVotes;
+    final percent = orgTotalVotes == 0 ? 0.0 : vote / orgTotalVotes;
     final imageUrl = item['image_url'] ?? '';
     final nama = item['nama'] ?? 'Nama Kandidat';
 
     return Card(
-      margin: const EdgeInsets.only(top: 16),
+      margin: const EdgeInsets.only(top: 12),
       elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -241,11 +258,10 @@ class _VoteResultScreenState extends State<VoteResultScreen> {
                 const SizedBox(width: 12),
                 CircleAvatar(
                   radius: 25,
+                  backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
                   backgroundColor: Colors.grey[200],
-                  backgroundImage:
-                      imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
                   child: imageUrl.isEmpty
-                      ? const Icon(Icons.person, size: 25, color: Colors.grey)
+                      ? const Icon(Icons.person, color: Colors.grey)
                       : null,
                 ),
                 const SizedBox(width: 12),
@@ -270,21 +286,19 @@ class _VoteResultScreenState extends State<VoteResultScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            ClipRRect(
+            LinearProgressIndicator(
+              value: percent,
+              minHeight: 12,
+              color: Colors.purple,
+              backgroundColor: Colors.grey[300],
               borderRadius: BorderRadius.circular(10),
-              child: LinearProgressIndicator(
-                value: percent,
-                backgroundColor: Colors.grey[300],
-                color: Colors.purple,
-                minHeight: 12,
-              ),
             ),
             const SizedBox(height: 8),
             Align(
               alignment: Alignment.centerRight,
               child: Text(
                 "$vote suara",
-                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
             ),
           ],
