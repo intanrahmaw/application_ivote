@@ -142,6 +142,21 @@ class _VoteScreenState extends State<VoteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        title: const Text(
+          "Vote",
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Montserrat', 
+            letterSpacing: 1,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
+        elevation: 4,
+      ),
       body: isLoading ? const Center(child: CircularProgressIndicator()) : _buildBody(),
       bottomNavigationBar: CustomBottomNavBar(
         selectedIndex: _selectedIndex,
@@ -158,14 +173,9 @@ class _VoteScreenState extends State<VoteScreen> {
       children: [
         const Padding(
           padding: EdgeInsets.only(bottom: 12),
-          child: Text(
-            "Daftar Kandidat",
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
+         
+           
+           
         ),
         ...candidates.map((candidate) => _buildCandidateCard(candidate)).toList(),
       ],
