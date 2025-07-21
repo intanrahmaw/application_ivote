@@ -64,7 +64,7 @@ class _EditAdminAccountScreenState extends State<EditAdminAccountScreen> {
     final newPassword = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
-    // Validasi hanya jika password baru diisi
+   
     if (newPassword.isNotEmpty && newPassword != confirmPassword) {
       Get.snackbar(
         'Error',
@@ -84,7 +84,7 @@ class _EditAdminAccountScreenState extends State<EditAdminAccountScreen> {
         'updated_at': DateTime.now().toIso8601String(),
       };
 
-      // Tambahkan password hanya jika diisi
+      
       if (newPassword.isNotEmpty) {
         updateData['password'] = newPassword;
       }
@@ -125,7 +125,7 @@ class _EditAdminAccountScreenState extends State<EditAdminAccountScreen> {
         keyboardType: keyboardType,
         validator: (val) {
           if (label.contains('Password Baru') || label.contains('Konfirmasi Password')) {
-            // Tidak wajib, validasi nanti saat _updateAccount
+            
             return null;
           }
 
@@ -184,7 +184,7 @@ class _EditAdminAccountScreenState extends State<EditAdminAccountScreen> {
                 _buildInput('Nama Lengkap', _namaController),
                 _buildInput('Password Baru', _passwordController, obscure: true),
                 _buildInput('Konfirmasi Password', _confirmPasswordController, obscure: true), // tambahkan ini juga biar lengkap
-                const SizedBox(height: 24), // jarak antara input dan tombol
+                const SizedBox(height: 24),
                 Row(
                   children: [
                     Expanded(
