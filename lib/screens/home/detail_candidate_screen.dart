@@ -20,7 +20,7 @@ class DetailCandidateScreen extends StatelessWidget {
         title: const Text('Detail Kandidat'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        centerTitle: false, // <== Judul di kiri
+        centerTitle: false, 
         elevation: 1,
       ),
       body: SingleChildScrollView(

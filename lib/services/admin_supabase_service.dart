@@ -1,6 +1,3 @@
-// lib/services/supabase_admin_service.dart
-
-import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/admin_model.dart';
 
@@ -13,7 +10,7 @@ final supabase = Supabase.instance.client;
 /// Ambil data admin berdasarkan username
 Future<Admin?> getAdminByUsername(String username) async {
   final response = await supabase
-      .from('admin') // pastikan nama tabel sudah benar di Supabase
+      .from('admin')
       .select()
       .eq('username', username)
       .maybeSingle();

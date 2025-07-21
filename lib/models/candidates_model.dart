@@ -23,13 +23,13 @@ class Candidate {
     this.imageUrl,
   });
 
- factory Candidate.fromMap(Map<String, dynamic> map) {
-    return Candidate(    
+  factory Candidate.fromMap(Map<String, dynamic> map) {
+    return Candidate(
       candidateId: map['candidate_id']?.toString() ?? '',
       electionId: map['elections_id']?.toString() ?? '',
-      nama: map['nama'] ?? '', 
-      organisasi: map['organisasi'] ?? '', 
-      label: map['label'] ?? '',    
+      nama: map['nama'] ?? '',
+      organisasi: map['organisasi'] ?? '',
+      label: map['label'] ?? '',
       visi: map['visi'] ?? '',
       misi: map['misi'] ?? '',
       imageUrl: map['image_url'],
@@ -40,5 +40,20 @@ class Candidate {
           ? DateTime.parse(map['updated_at'])
           : DateTime.now(),
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'candidate_id': candidateId,
+      'elections_id': electionId,
+      'nama': nama,
+      'organisasi': organisasi,
+      'label': label,
+      'visi': visi,
+      'misi': misi,
+      'image_url': imageUrl,
+      'created_at': created.toIso8601String(),
+      'updated_at': updated.toIso8601String(),
+    };
   }
 }

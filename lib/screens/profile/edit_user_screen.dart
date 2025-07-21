@@ -66,6 +66,7 @@ class _EditUserAccountScreenState extends State<EditUserAccountScreen> {
     final newPassword = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
+    // Hanya validasi kalau user mengisi password
     if (newPassword.isNotEmpty && newPassword != confirmPassword) {
       Get.snackbar(
         'Error',
@@ -124,7 +125,7 @@ class _EditUserAccountScreenState extends State<EditUserAccountScreen> {
         obscureText: obscure,
         keyboardType: keyboardType,
         validator: (val) {
-          if (label.contains('Password Baru')) return null;
+          if (label == 'Password Baru' || label == 'Ulangi Password Baru') return null;
           if (val == null || val.trim().isEmpty) return '$label tidak boleh kosong';
           return null;
         },
@@ -230,6 +231,7 @@ class _EditUserAccountScreenState extends State<EditUserAccountScreen> {
                 _buildPhoneInput(),
                 _buildInput('Alamat', _alamatController),
                 _buildInput('Password Baru', _passwordController, obscure: true),
+                _buildInput('Ulangi Password Baru', _confirmPasswordController, obscure: true),
                 const SizedBox(height: 30),
                 Row(
                   children: [

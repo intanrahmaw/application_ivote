@@ -32,7 +32,7 @@ class _EditAdminAccountScreenState extends State<EditAdminAccountScreen> {
 
   Future<void> _loadAccountData() async {
     try {
-       print('LOGGED IN ADMIN ID: $loggedInUserId'); // ✅ Tambahkan ini
+       print('LOGGED IN ADMIN ID: $loggedInUserId'); 
 
       final data = await supabase
           .from('admin')
@@ -179,58 +179,59 @@ class _EditAdminAccountScreenState extends State<EditAdminAccountScreen> {
           padding: const EdgeInsets.all(24),
           child: Form(
             key: _formKey,
-child: Column(
-  crossAxisAlignment: CrossAxisAlignment.start,
-  children: [
-    const Text(
-      'Edit Akun',
-      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-    ),
-    const SizedBox(height: 24),
-    _buildInput('Username', _usernameController),
-    _buildInput('Nama Lengkap', _namaController),
-    _buildInput('Password Baru', _passwordController, obscure: true),
-    _buildInput('Konfirmasi Password', _confirmPasswordController, obscure: true), // tambahkan ini juga biar lengkap
-    const SizedBox(height: 24), // jarak antara input dan tombol
-    Row(
-      children: [
-        Expanded(
-          child: OutlinedButton(
-            onPressed: () => Navigator.pop(context),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.deepPurple,
-              side: const BorderSide(color: Colors.deepPurple),
-              minimumSize: const Size.fromHeight(50),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Edit Akun',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 24),
+                _buildInput('Username', _usernameController),
+                _buildInput('Nama Lengkap', _namaController),
+                _buildInput('Password Baru', _passwordController, obscure: true),
+                _buildInput('Konfirmasi Password', _confirmPasswordController, obscure: true), // tambahkan ini juga biar lengkap
+                const SizedBox(height: 24), // jarak antara input dan tombol
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.deepPurple,
+                          side: const BorderSide(color: Colors.deepPurple),
+                          minimumSize: const Size.fromHeight(50),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text('Kembali'),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _saving ? null : _updateAccount,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple,
+                          minimumSize: const Size.fromHeight(50),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: _saving
+                            ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              )
+                            : const Text(
+                                'Simpan',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                              ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),          
             ),
-            child: const Text('Kembali'),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: ElevatedButton(
-            onPressed: _saving ? null : _updateAccount,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepPurple,
-              minimumSize: const Size.fromHeight(50),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            child: _saving
-                ? const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                  )
-                : const Text(
-                    'Simpan',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-          ),
-        ),
-      ],
-    )
-  ],
-),          ),
           ),
         ),
       );

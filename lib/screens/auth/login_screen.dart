@@ -46,9 +46,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (admin != null) {
         loggedInUserName = admin['username'];
-        loggedInUserId = admin['admin_id']; // ✅ ini yang belum ada
-        loggedInUserNama = admin['nama']; // simpan nama lengkap admin
-        loggedInUserRole = 'admin';
+        loggedInUserId = admin['admin_id'];
+        loggedInUserNama = admin['nama'];
 
         Get.snackbar('Login Berhasil', 'Selamat datang, ${admin['nama']}!',
             backgroundColor: Colors.green, colorText: Colors.white);

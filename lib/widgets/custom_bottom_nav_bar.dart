@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-// Pastikan path ke global_user.dart sudah benar
 import 'package:application_ivote/utils/global_user.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
