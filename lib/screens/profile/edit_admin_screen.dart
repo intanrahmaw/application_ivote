@@ -64,6 +64,7 @@ class _EditAdminAccountScreenState extends State<EditAdminAccountScreen> {
     final newPassword = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
+    // Validasi hanya jika password baru diisi
     if (newPassword.isNotEmpty && newPassword != confirmPassword) {
       Get.snackbar(
         'Error',
@@ -83,11 +84,15 @@ class _EditAdminAccountScreenState extends State<EditAdminAccountScreen> {
         'updated_at': DateTime.now().toIso8601String(),
       };
 
+      // Tambahkan password hanya jika diisi
       if (newPassword.isNotEmpty) {
         updateData['password'] = newPassword;
       }
 
-      await supabase.from('admin').update(updateData).eq('admin_id', loggedInUserId);
+      await supabase
+          .from('admin')
+          .update(updateData)
+          .eq('admin_id', loggedInUserId);
 
       loggedInUserName = _usernameController.text.trim();
 
@@ -119,7 +124,11 @@ class _EditAdminAccountScreenState extends State<EditAdminAccountScreen> {
         obscureText: obscure,
         keyboardType: keyboardType,
         validator: (val) {
-          if (label.contains('Password Baru')) return null;
+          if (label.contains('Password Baru') || label.contains('Konfirmasi Password')) {
+            // Tidak wajib, validasi nanti saat _updateAccount
+            return null;
+          }
+
           if (val == null || val.trim().isEmpty) return '$label tidak boleh kosong';
           return null;
         },
@@ -137,22 +146,6 @@ class _EditAdminAccountScreenState extends State<EditAdminAccountScreen> {
             borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildPhoneInput() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            height: 56,
-           
-          ),
-          const SizedBox(width: 10),
-        ],
       ),
     );
   }
