@@ -1,0 +1,270 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:application_ivote/screens/auth/login_screen.dart';
+import 'package:application_ivote/screens/profile/edit_user_screen.dart';
+import 'package:application_ivote/screens/profile/edit_admin_screen.dart';
+import 'package:application_ivote/utils/global_user.dart';
+import 'package:application_ivote/widgets/sub_menu_admin.dart';
+import 'package:application_ivote/widgets/custom_bottom_nav_bar.dart';
+
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final supabase = Supabase.instance.client;
+  String displayName = 'Loading...';
+  bool isLoading = true;
+  int _selectedIndex = 3;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    if (loggedInUserName.isEmpty || loggedInUserRole.isEmpty) {
+      Get.offAll(() => const LoginScreen());
+      return;
+    }
+
+    try {
+      final isAdmin = loggedInUserRole.toLowerCase() == 'admin';
+      final table = isAdmin ? 'admin' : 'users';
+
+      final data = await supabase
+          .from(table)
+          .select('nama')
+          .eq('username', loggedInUserName.trim())
+          .maybeSingle();
+
+      if (!mounted) return;
+
+      setState(() {
+        displayName = data != null ? data['nama'] ?? 'Pengguna' : 'Pengguna tidak ditemukan';
+        isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        displayName = 'Gagal Ambil Nama';
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _logout() async {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.logout, size: 48, color: Colors.deepPurple),
+              const SizedBox(height: 16),
+              const Text(
+                'Konfirmasi Logout',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Apakah Anda yakin ingin keluar dari akun?',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Get.back(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[300],
+                        foregroundColor: Colors.black87,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text('Batal'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        loggedInUserName = '';
+                        loggedInUserRole = '';
+                        Get.offAll(() => const LoginScreen());
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text('Logout'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  void _onItemTapped(int index) {
+    if (index == _selectedIndex) return;
+
+    if (loggedInUserRole == 'admin') {
+      switch (index) {
+        case 0:
+          Get.offAllNamed('/dashboard');
+          break;
+        case 1:
+          SubMenuAdmin.show(context);
+          break;
+        case 2:
+          Get.offAllNamed('/result');
+          break;
+        case 3:
+          Get.offAllNamed('/profile');
+          break;
+      }
+    } else {
+      switch (index) {
+        case 0:
+          Get.offAllNamed('/dashboard');
+          break;
+        case 1:
+          Get.offAllNamed('/vote');
+          break;
+        case 2:
+          Get.offAllNamed('/result');
+          break;
+        case 3:
+          Get.offAllNamed('/profile');
+          break;
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F7F7),
+      body: SafeArea(
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 30),
+                    const CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.grey,
+                      child: Icon(Icons.person, size: 50, color: Colors.white),
+                    ),
+                    const SizedBox(height: 15),
+                    Text(
+                      displayName,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    _buildProfileOption(
+                      icon: Icons.edit,
+                      text: 'Edit Profil',
+                      onTap: () async {
+                        if (loggedInUserRole.toLowerCase() == 'admin') {
+                          await Get.to(() => const EditAdminAccountScreen());
+                        } else {
+                          await Get.to(() => const EditUserAccountScreen());
+                        }
+                        _loadUserProfile(); 
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildProfileOption(
+                      icon: Icons.logout,
+                      text: 'Logout',
+                      onTap: _logout,
+                      isDanger: true,
+                    ),
+                  ],
+                ),
+              ),
+      ),
+      bottomNavigationBar: CustomBottomNavBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
+      ),
+    );
+  }
+
+  Widget _buildProfileOption({
+    required IconData icon,
+    required String text,
+    required VoidCallback onTap,
+    bool isDanger = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6,
+              offset: Offset(0, 2),
+            )
+          ],
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 22,
+              backgroundColor: isDanger ? Colors.red[50] : Colors.deepPurple[50],
+              child: Icon(
+                icon,
+                color: isDanger ? Colors.red : Colors.deepPurple,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Text(
+              text,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: isDanger ? Colors.red : Colors.black87,
+              ),
+            ),
+            const Spacer(),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+          ],
+        ),
+      ),
+    );
+  }
+}

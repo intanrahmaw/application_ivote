@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:application_ivote/widgets/custom_bottom_nav_bar_user.dart';
+import 'package:application_ivote/widgets/custom_bottom_nav_bar.dart';
 import 'package:application_ivote/utils/global_user.dart';
-import 'package:application_ivote/screens/vote/vote_screen.dart';
+import 'package:application_ivote/widgets/sub_menu_admin.dart';
+import 'detail_candidate_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:async';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -12,18 +15,149 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _selectedIndex = 0;
+  final int _selectedIndex = 0;
+  final supabase = Supabase.instance.client;
+
+  List<Map<String, dynamic>> kandidatList = [];
+  List<Map<String, dynamic>> filteredList = [];
+
+  DateTime? endTime;
+  Timer? countdownTimer;
+  Duration remainingTime = Duration.zero;
+
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchKandidat();
+    _fetchElectionEndTime();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  void _fetchKandidat() async {
+    try {
+      final response = await supabase
+          .from('candidates')
+          .select('*, elections!inner(is_active)')
+          .eq('elections.is_active', true);
+
+      if (mounted) {
+        setState(() {
+          kandidatList = List<Map<String, dynamic>>.from(response);
+          filteredList = kandidatList;
+        });
+      }
+    } catch (e) {
+      print('Gagal memuat kandidat aktif: $e');
+    }
+  }
+
+  void _fetchElectionEndTime() async {
+    try {
+      final response = await supabase
+          .from('elections')
+          .select()
+          .order('created_at', ascending: false)
+          .limit(1)
+          .maybeSingle();
+
+      if (response != null) {
+        final isActive = response['is_active'] ?? false;
+        final endTimeString = response['end_time'];
+
+        if (isActive && endTimeString != null) {
+          setState(() {
+            endTime = DateTime.parse(endTimeString);
+            _startCountdown();
+          });
+        } else {
+          // Tidak aktif = timer jadi nol
+          setState(() {
+            endTime = null;
+            remainingTime = Duration.zero;
+          });
+        }
+      } else {
+        // Tidak ada election
+        setState(() {
+          endTime = null;
+          remainingTime = Duration.zero;
+        });
+      }
+    } catch (e) {
+      print('Gagal memuat waktu akhir pemilu: $e');
+    }
+  }
+
+  void _startCountdown() {
+    countdownTimer?.cancel();
+    countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      final now = DateTime.now();
+      if (mounted && endTime != null) {
+        setState(() {
+          remainingTime = endTime!.difference(now).isNegative
+              ? Duration.zero
+              : endTime!.difference(now);
+        });
+      }
+    });
+  }
+
+  void _onSearchChanged() {
+    String keyword = _searchController.text.toLowerCase();
+    setState(() {
+      filteredList = kandidatList.where((k) {
+        final nama = (k['nama'] ?? '').toLowerCase();
+        final organisasi = (k['organisasi'] ?? '').toLowerCase();
+        final label = (k['label'] ?? '').toLowerCase();
+        return nama.contains(keyword) ||
+            organisasi.contains(keyword) ||
+            label.contains(keyword);
+      }).toList();
+    });
+  }
+
+  @override
+  void dispose() {
+    countdownTimer?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
 
   void _onItemTapped(int index) {
     if (index == _selectedIndex) return;
 
-    switch (index) {
-      case 0:
-        // Tetap di DashboardScreen
-        break;
-      case 1:
-        Get.off(const VoteScreen());
-        break;
+    if (loggedInUserRole == 'admin') {
+      switch (index) {
+        case 0:
+          Get.offAllNamed('/dashboard');
+          break;
+        case 1:
+          SubMenuAdmin.show(context);
+          break;
+        case 2:
+          Get.offAllNamed('/result');
+          break;
+        case 3:
+          Get.offAllNamed('/profile');
+          break;
+      }
+    } else {
+      switch (index) {
+        case 0:
+          Get.offAllNamed('/dashboard');
+          break;
+        case 1:
+          Get.offAllNamed('/vote');
+          break;
+        case 2:
+          Get.offAllNamed('/result');
+          break;
+        case 3:
+          Get.offAllNamed('/profile');
+          break;
+      }
     }
   }
 
@@ -38,13 +172,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Icon(Icons.person, color: Colors.white),
           ),
         ),
-        title: Text(loggedInUserName.isNotEmpty ? loggedInUserName : 'Pengguna'),
+        title: Text(
+          loggedInUserNama.isNotEmpty
+              ? loggedInUserNama.capitalizeFirst!
+              : 'Pengguna',
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(4.0),
-          child: Container(
-            color: Colors.grey[200],
-            height: 1.0,
-          ),
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(color: Colors.grey[200], height: 1),
         ),
       ),
       body: SingleChildScrollView(
@@ -61,36 +197,71 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 16.0),
             _buildSearchBar(),
             const SizedBox(height: 16.0),
-            _buildKandidatCard('Intan Rahma', 'Kandidat 1'),
-            const SizedBox(height: 16.0),
-            _buildKandidatCard('Fadenta', 'Kandidat 2'),
+            if (filteredList.isEmpty)
+              const Center(child: Text('Tidak ada kandidat ditemukan'))
+            else
+              ...filteredList.map((k) => _buildKandidatCard(k)),
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBarUser(
+      bottomNavigationBar: CustomBottomNavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
       ),
     );
   }
 
+  Widget _buildSearchBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.search, color: Colors.grey),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                hintText: 'cari kandidat...',
+                border: InputBorder.none,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTimerCard() {
+    int days = remainingTime.inDays;
+    int hours = remainingTime.inHours % 24;
+    int minutes = remainingTime.inMinutes % 60;
+    int seconds = remainingTime.inSeconds % 60;
+
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 77, 55, 114),
-        borderRadius: BorderRadius.circular(15.0),
+        color: Colors.deepPurple,
+        borderRadius: BorderRadius.circular(12.0),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: const [
-              Icon(Icons.hourglass_empty, color: Colors.white),
-              SizedBox(width: 8.0),
+              Icon(Icons.hourglass_bottom, color: Colors.white),
+              SizedBox(width: 8),
               Text(
                 'Waktu tersisa untuk pemilu',
-                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -98,35 +269,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildTimeItem('100', 'Hari'),
-              _buildTimeItem('5', 'Jam'),
-              _buildTimeItem('19', 'Menit'),
-              _buildTimeItem('47', 'Detik'),
+              _buildTimeItem('$days', 'Hari'),
+              _buildTimeItem('$hours', 'Jam'),
+              _buildTimeItem('$minutes', 'Menit'),
+              _buildTimeItem('$seconds', 'Detik'),
             ],
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: Row(
-        children: const [
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'cari kandidat...',
-                border: InputBorder.none,
-              ),
-            ),
-          ),
-          Icon(Icons.search, color: Colors.grey),
         ],
       ),
     );
@@ -139,59 +287,88 @@ class _DashboardScreenState extends State<DashboardScreen> {
           value,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 32,
+            fontSize: 28,
             fontWeight: FontWeight.bold,
           ),
         ),
         Text(
           label,
-          style: const TextStyle(color: Colors.white, fontSize: 14),
+          style: const TextStyle(color: Colors.white70),
         ),
       ],
     );
   }
 
-  Widget _buildKandidatCard(String name, String role) {
+  Widget _buildKandidatCard(Map<String, dynamic> kandidat) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(12.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 5,
+            color: Colors.black12,
+            blurRadius: 6,
             offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Row(
         children: [
-          const CircleAvatar(
-            backgroundColor: Colors.grey,
-            child: Icon(Icons.person, color: Colors.white),
+          CircleAvatar(
+            radius: 30,
+            backgroundImage:
+                kandidat['image_url'] != null && kandidat['image_url'] != ''
+                    ? NetworkImage(kandidat['image_url'])
+                    : null,
+            backgroundColor: Colors.grey[300],
+            child:
+                kandidat['image_url'] == null || kandidat['image_url'] == ''
+                    ? const Icon(Icons.person, color: Colors.white, size: 30)
+                    : null,
           ),
           const SizedBox(width: 16.0),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                Text(role, style: const TextStyle(color: Colors.grey)),
+                Text(
+                  kandidat['nama'] ?? '-',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  kandidat['organisasi'] ?? '-',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                  ),
+                ),
+                Text(
+                  kandidat['label'] ?? '-',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey,
+                  ),
+                ),
               ],
             ),
           ),
-          OutlinedButton(
-            onPressed: () {},
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Colors.deepPurple),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-            ),
-            child: const Text(
-              'lihat profile',
-              style: TextStyle(color: Colors.deepPurple),
-            ),
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      DetailCandidateScreen(candidate: kandidat),
+                ),
+              );
+            },
+            child: const Text('Lihat', style: TextStyle(color: Colors.deepPurple)),
           ),
         ],
       ),
